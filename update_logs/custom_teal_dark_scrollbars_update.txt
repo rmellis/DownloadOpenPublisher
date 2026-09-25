@@ -1,0 +1,51 @@
+================================================================================
+UPDATE LOG: Custom Teal Green on Dark Scrollbars (Export Queue & Doc Preview)
+================================================================================
+Date: September 13, 2026
+Component: export_queue.html, doc_preview.html (Scoped Scrollbar Styling Subsystem)
+
+OVERVIEW:
+Replaced the unstyled default OS scrollbars in Export & Print Queue Monitor and
+eliminated the bright white scrollbar track in Presentation Preview. Both windows
+now utilize a unified, custom teal green on dark slate scrollbar theme that
+seamlessly integrates with OpenPublisher's dark window aesthetic. This styling
+is strictly scoped to these two secondary windows without impacting the main
+application canvas or webapp controls.
+
+KEY FIXES & ARCHITECTURAL HIGHLIGHTS:
+1. Root Cause Identification:
+   - Presentation Preview (doc_preview.html) loaded OpenPublisher's external style.css,
+     where the default scrollbar rules set --scroll-track and --scroll-border to #f1f5f9
+     (near-white) in light mode. Because the window operates in dark mode, the bright
+     white track clashed starkly with the dark navy (#0b1120) viewport background.
+   - Export & Print Queue Monitor (export_queue.html) did not load style.css, resulting
+     in native unstyled Windows OS scrollbars (wide light-gray track and square thumbs)
+     rendering inside the jobs list container.
+
+2. Scoped Custom Teal Green on Dark Scrollbars:
+   - Implemented high-specificity scoped CSS variables and rules directly within the
+     <style> blocks of both export_queue.html and doc_preview.html.
+   - Configured root theme variables:
+     * --scroll-track: #0b1120 !important (deep dark navy/slate matching window backgrounds)
+     * --scroll-border: #0b1120 !important
+     * --main-scrollbar-thumb: var(--bg-color, #007670) !important (OpenPublisher brand teal)
+     * --main-scrollbar-thumb-hover: #009e94 !important (bright teal hover feedback)
+   - Dual-engine CSS compatibility:
+     * Modern Chromium standard: scrollbar-color: var(--bg-color, #007670) #0b1120 !important
+     * WebKit engine fallback: styled ::-webkit-scrollbar (10px width/height, 5px border-radius,
+       2px inset dark border, styled hover states, and dark corner background).
+
+3. Isolation Guarantee:
+   - Scoped strictly inside the separate HTML documents of export_queue.html and doc_preview.html.
+   - Preserves all scrollbar configurations on the main OpenPublisher wrapper, editor canvas,
+     and other application components.
+
+4. Verification & Testing:
+   - Verified in headless Chromium with scrollbars enabled:
+     * Presentation Preview: Clean dark navy track (#0b1120) with brand teal green thumb (#007670)
+       and matching dark-themed arrows. Bright white track is fully eliminated.
+     * Export & Print Queue Monitor: Native gray OS scrollbar replaced with matching dark navy track
+       and brand teal green thumb.
+   - Visual screenshots captured and validated in doc_preview_dark_scrollbar.png and
+     export_queue_dark_scrollbar.png.
+================================================================================

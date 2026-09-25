@@ -1,0 +1,10 @@
+# Update: Safe Mode & Cache Reset Flag
+
+## Added
+- Added argument parsing logic to the \
+w.App.argv\ block in \wrapper.html\.
+- The application now correctly listens for \--safe-mode\ or \--reset\ launch flags.
+- If either flag is detected during launch, the app natively clears its internal Chromium cache via \
+w.App.clearCache()\ and completely clears \localStorage\.
+- Displays a native, synchronous alert window stating 'Application cache and settings have been reset.' to provide clear confirmation to the user.
+- Updated the file association loading logic to intelligently find the document argument instead of strictly assuming it's always at index 0.

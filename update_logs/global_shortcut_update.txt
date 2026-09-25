@@ -1,0 +1,23 @@
+# Global OS Keyboard Shortcut & Window Restoration
+
+## Overview
+Added an OS-level global keyboard shortcut system using the `nw.Shortcut` and `nw.App` APIs in `wrapper.html`. This allows users to instantly restore, un-minimize, and focus OpenPublisher from anywhere in the operating system, regardless of whether the app currently has focus, is minimized to the taskbar, or hidden in the system tray.
+
+## Key Features & Implementation
+
+1. **Instant Foreground Window Restoration**
+   - When triggered, the shortcut executes `win.show()`, `win.restore()`, and `win.focus()`.
+   - Bypasses OS focus-stealing prevention to bring OpenPublisher cleanly to the foreground even when buried beneath other full-screen or focused applications.
+
+2. **Cross-Platform Modifier Mapping**
+   - Automatically adapts to the host operating system via `process.platform`:
+     - **Windows & Linux**: Binds to `Ctrl+Shift`.
+     - **macOS**: Binds to `Cmd+Shift` (`Command`).
+
+3. **Multi-Key Chord & OS API Compatibility**
+   - Native OS hotkey APIs (Windows `RegisterHotKey` and macOS Carbon/Cocoa hotkey systems) only accept modifier keys combined with a single primary virtual key code. They do not natively support simultaneous multi-character keys (e.g. `O+P`).
+   - To deliver the requested "Open Publisher" (`OP`) experience seamlessly, both `Ctrl+Shift+O` (`Cmd+Shift+O`) and `Ctrl+Shift+P` (`Cmd+Shift+P`) are registered. Hitting either combination—or pressing them together—instantly activates the window.
+
+4. **Resource Management & Hotkey Leak Prevention**
+   - Registered shortcut instances are tracked in a dedicated lifecycle registry.
+   - Hooked into the window's `win.on('close')` event to explicitly unregister all hotkeys via `nw.App.unregisterGlobalHotKey()`. This guarantees that global OS shortcuts are released immediately upon application exit, preventing zombie shortcuts or hotkey conflicts in other desktop software.

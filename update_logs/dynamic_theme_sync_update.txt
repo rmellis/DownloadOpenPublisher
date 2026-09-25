@@ -1,0 +1,18 @@
+# Update: Dynamic Theme Synchronization & Cross-Session Persistence
+
+## Summary
+Implemented dynamic theme synchronization and cross-session persistence between the web application and the native desktop wrapper. Previously, theme and custom color selections were lost whenever the application was closed and reopened, reverting both client and webapp to the default teal color. The desktop wrapper now persists theme settings across sessions, immediately restores custom colors during startup without visual flicker, ensures persistent storage in the guest webview, and enforces theme synchronization on page load.
+
+## Root Causes Resolved
+1. Webview Partition Ephemerality: The webview element used partition="trusted", which Chromium/NW.js treats as an ephemeral in-memory partition. All guest storage (including localStorage.getItem('opub_ui_theme')) was discarded upon application exit.
+2. Wrapper Storage Gap: The OP_THEME_UPDATE IPC listener updated in-memory CSS variables but did not write to the client's localStorage.
+3. Startup Theme Reset: On application startup, :root CSS variables defaulted to hardcoded #146F6E, with no restoration routine executing before window render.
+4. Hardcoded CSS Injection: The webview.insertCSS handler unconditionally injected html, body, #app, #root { background-color: #146F6E !important; }, forcing the guest canvas workspace to teal regardless of the selected theme.
+
+## Changes Made
+- Persistent Partition (wrapper.html): Changed <webview partition="trusted"> to <webview partition="persist:trusted">. Webview session data (including opub_ui_theme) now persists to disk across launches.
+- Instant Startup Theme Restoration (wrapper.html): Added an early synchronous initialization script in the <head> tag before DOM rendering. This loads op_saved_theme from localStorage and immediately sets --bg-color and --accent-color on document.documentElement, preventing teal color flickering on launch.
+- Two-Way Theme Persistence (wrapper.html): Updated the OP_THEME_UPDATE IPC handler to persist theme data (themeName, theme, bg, accent, mode) into localStorage.setItem('op_saved_theme', ...) and localStorage.setItem('opub_ui_theme', ...) as well as keeping the ghost snap preview window in sync.
+- Dynamic Webview CSS (wrapper.html): Modified webview.insertCSS during contentload to use background-color: var(--ui-theme-color, ${currentThemeBg}) !important; instead of hardcoded #146F6E.
+- Guest Webview Theme Re-enforcement (wrapper.html): Added a safety restoration script during webview contentload that executes window.applyTheme(targetTheme) or writes localStorage.setItem('opub_ui_theme', ...) in the guest context, ensuring both the client frame and the webapp stay perfectly synchronized across all launches.
+- Window Bounds Init Sync (wrapper.html): Added a secondary safety restoration check alongside op_window_bounds initialization to guarantee theme consistency.

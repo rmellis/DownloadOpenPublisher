@@ -1,0 +1,18 @@
+# Update: Exit Modal UI Modernization
+
+## Summary
+The "Unsaved Changes" exit warning modal has been completely redesigned to look sleeker and more native to the operating system, replacing the previous oversized, cartoon-like design with a professional, desktop-standard aesthetic.
+
+## Changes
+- **Layout & Proportions (wrapper.html)**:
+  - Reduced the modal width slightly from 400px to 380px.
+  - Reduced the overall corner radius from a bulky 12px to a standard native 6px.
+  - Decreased the oversized padding in the header bar and text area.
+- **Typography & Alignment**:
+  - Switched the text alignment from center to left-aligned, matching standard Windows/Mac dialog boxes.
+  - Adjusted font sizes to feel more proportional and professional.
+- **Buttons & Footer**:
+  - Moved the buttons into a dedicated, lightly shaded footer area (#f8f9fa) with a subtle top border.
+  - Aligned the buttons to the bottom-right corner rather than centering them.
+  - Removed the heavy drop shadows. Buttons are cleanly styled with a classic pill-shaped 24px border-radius and crisp hover-state borders.
+  - Changed the "Don't Save" and "Cancel" buttons to cleanly outlined secondary buttons to emphasize "Save" as the primary action.

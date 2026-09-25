@@ -1,0 +1,10 @@
+# Update: Export Priority Elevation
+
+## Summary
+The wrapper now dynamically elevates its operating system process priority during active exports to maximize CPU allocation for the app's rendering threads, reducing export times and preventing lag.
+
+## Changes
+- **Process Priority Management (`wrapper.html`)**:
+  - Utilizes the Node `os` module inside the IPC message handlers.
+  - Intercepts the `OP_EXPORT_START` message to call `os.setPriority(os.constants.priority.PRIORITY_ABOVE_NORMAL)`, instructing the OS kernel to prioritize the application over standard background processes.
+  - Intercepts the `OP_EXPORT_COMPLETE` message to securely revert the priority back to `os.constants.priority.PRIORITY_NORMAL`, ensuring the host system returns to a balanced state after the heavy rendering task finishes.

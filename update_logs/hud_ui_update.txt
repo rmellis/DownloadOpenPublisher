@@ -1,0 +1,12 @@
+# Modal & HUD UI Overhaul
+
+## Changes Made
+- Updated the wrapper CSS (`#dev-mode-overlay` and `#dev-mode-header`) to strictly match the design language of the OpenPublisher web app's `InApp` dialogs (e.g. the "About" window).
+- Replaced the basic monospace text in the HUD header with the native system sans-serif font stack.
+- Decreased the vertical header padding globally across client modals to perfectly match the tight `46px` toolbar height profile of the web app.
+- Increased the border-radius from `8px` to `12px` to match the thicker, softer corners of the web app modal system.
+- Replaced the simple textual `&times;` close icon with a matching 22px SVG cross icon.
+- Sized the close button to exactly `36x36px` to match the native modals.
+- Added the standard InApp close-button container: a subtle dark transparent background (`rgba(0,0,0,0.25)`) that cleanly transitions into the signature red (`#d35450`) rounded-square background on hover.
+- Added a subtle `transform: scale(0.95)` click animation for the close button to make it feel responsive and native.
+- Rolled out this new close button design and header sizing to the "Unsaved Changes" (Exit) modal and the "Confirm Reload" modal so all native popups share a consistent design language.

@@ -1,0 +1,37 @@
+# Window Shadow, Rounded Corners & Omnidirectional Resizing
+
+## Overview
+Added rounded corners, a soft OS drop shadow, and a high-performance omnidirectional window resizing engine to OpenPublisher's frameless window.
+
+## The Problem
+- **Missing Shadows & Sharp Edges**: Frameless transparent windows in NW.js strip away default OS window decorations, resulting in flat, squared corners with no drop shadow.
+- **Resize Hitbox Offset**: Adding margin for a CSS drop shadow pushes native OS resize borders away from the visible application frame.
+- **Resize Flicker & Lag**: Continuously resizing Chromium transparent windows causes DirectX swapchain reallocations, leading to visual tearing, stutter, and window bounce.
+
+## The Solution
+
+1. **Rounded Corners & Drop Shadow**
+   - Configured alpha-channel compositing with Windows DWM via `"transparent": true` in `package.json`.
+   - Wrapped the application in `#app-container` with a `12px` border radius, a soft ambient drop shadow (`0 4px 20px rgba(0,0,0,0.5)`), and signature `#146F6E` brand coloring.
+   - Applied hardware-accelerated GuestView masking (`-webkit-mask-image`) so the inner `<webview>` cleanly respects the rounded corners without edge bleed.
+
+2. **Frame-Aligned Omnidirectional Resizing**
+   - Placed precision resize handles along all visible borders and corners:
+     - Top, bottom, left, and right edges (`.resizer-n`, `.resizer-s`, `.resizer-w`, `.resizer-e`).
+     - Generous 36x36px corner hitboxes (`.resizer-nw`, `.resizer-ne`, `.resizer-sw`, `.resizer-se`).
+   - Layered top edge resizers (`z-index: 99995`) below window control buttons and titlebar drag zones to preserve full native window-dragging capability.
+
+3. **Smooth Preview Frame (`ghostWin`)**
+   - Replaced continuous OS window resizing with an interactive preview frame architecture rendered by an independent transparent window (`ghostWin`).
+   - The preview frame tracks mouse movement in real time synced to display VSYNC via `requestAnimationFrame`, eliminating edge flicker, stepping, and swapchain lag.
+   - The main window remains stationary during drag, preventing window bouncing or layout reflow.
+   - Features a live dimension badge (`1320 x 760 (+50px)`) and signature `#146F6E` styling.
+   - Commits final dimensions instantaneously in a single frame upon mouse release.
+   - Robust cancellation on blur, screenshot overlays (e.g. Win+Shift+S), and Escape key prevents window lock-up.
+   - Bound to application exit handlers to guarantee clean process termination with zero lingering background tasks.
+
+4. **Cross-Platform Architecture (Windows, macOS, Linux)**
+   - **Windows (10 / 11)**: Native DWM alpha-channel compositing with VSYNC-locked preview framing and loss-of-focus protection.
+   - **macOS (`darwin`)**: Automatically detects the OS to mount traffic-light window controls on the top-left (`setTheme('mac')`). Native CoreAnimation and Metal double-buffering handle transparent multi-window compositing smoothly across 60Hz and 120Hz ProMotion displays.
+   - **Linux (`linux`)**: Runs seamlessly on composited X11 environments (GNOME, KDE, XFCE + Picom) and XWayland. For restrictive pure Wayland environments that limit global window positioning, an automated fallback switches to an internal CSS outline (`#resize-ghost`), ensuring uninterrupted resizing.
+   - **Process & Memory Integrity**: Exit handlers across all platforms explicitly terminate both the main window and preview process to prevent orphaned background tasks.

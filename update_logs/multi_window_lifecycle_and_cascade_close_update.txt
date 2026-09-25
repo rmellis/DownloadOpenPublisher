@@ -1,0 +1,60 @@
+================================================================================
+UPDATE LOG: Multi-Window Lifecycle & Cascading Application Exit Teardown
+================================================================================
+Date: September 13, 2026
+Component: wrapper.html, doc_preview.html, export_queue.html, quick_actions.html,
+           backup_mgr.html, prev_versions.html (Window Lifecycle Subsystem)
+
+OVERVIEW:
+Resolved window lifecycle bugs where clicking topbar buttons opened duplicate windows,
+dialog close buttons failed to dismiss their windows, and detached windows remained
+open on the desktop after closing the main application. Implemented a robust
+dual-layer cascading teardown pipeline ensuring all secondary windows exit cleanly
+with OpenPublisher.
+
+KEY FIXES & ARCHITECTURAL HIGHLIGHTS:
+1. Root Cause Identification:
+   - Topbar buttons had duplicate triggers (inline onclick and external event listeners)
+     causing simultaneous nw.Window.open calls.
+   - Closing was previously delegated back to mainWindow.dockDocPreview, which failed
+     when duplicate window references overwrote each other, orphaning the first window.
+   - Custom titlebar X button (#win-close) and exit modals called win.close(true) directly.
+     In NW.js, passing true bypasses the win.on('close') listener entirely, leaving
+     detached child windows alive and keeping the application process running.
+
+2. Single-Instance Mutex Guards:
+   - Added asynchronous opening mutexes (isDocPreviewOpening, isExportQueueOpening)
+     to prevent duplicate window creation during async NW.js initialization.
+   - Added existing-window focus check: subsequent clicks bring the current window
+     to the front (.show(); .focus();) instead of spawning new instances.
+   - Direct window termination: child window close buttons and Escape key invoke
+     nw.Window.get().close(true) directly on their own instances.
+
+3. Unified Application Exit Pipeline (terminateAppCleanly):
+   - Created closeAllChildWindows() in wrapper.html that explicitly closes all tracked
+     detached windows (docPreviewWindow, exportQueueWindow, quickActionsWindow,
+     ipcSnifferWindow, hudWindow, ghostWin, backupMgrWindow, prevVersionsWindow).
+   - In NW.js, also queries nw.Window.getAll() to ensure any unmapped windows are closed.
+   - Created terminateAppCleanly() which persists window state, releases power keep-awake,
+     unregisters global OS hotkeys, closes all child windows, and executes nw.App.quit().
+   - Routed all exit pathways through terminateAppCleanly():
+     * Titlebar X button (#win-close) via clean OP_DIRTY_RESPONSE handling
+     * Exit confirmation modal "Don't Save" button (#custom-exit-dont-save)
+     * Auto-close following atomic save completion (_closeAfterSave)
+     * Main window OS close event (win.on('close'))
+     * Page beforeunload and unload fallback events
+
+4. Fail-Safe Heartbeat Monitor in Secondary Windows:
+   - Added a 350ms heartbeat interval to doc_preview.html, export_queue.html,
+     quick_actions.html, backup_mgr.html, and prev_versions.html.
+   - If the main OpenPublisher window terminates, crashes, or is killed by any means,
+     the child windows detect mainWin.closed === true and close themselves immediately
+     via nw.Window.get().close(true).
+
+VERIFICATION:
+- Automated single-invocation test verified 5 rapid clicks spawn exactly 1 window.
+- Direct close and Escape key tests passed across all secondary dialogs.
+- Cascading teardown tests confirmed that closing OpenPublisher via any exit path
+  instantly closes all secondary windows and terminates the NW.js process.
+- Heartbeat tests verified secondary windows auto-close within 350ms of main window exit.
+================================================================================

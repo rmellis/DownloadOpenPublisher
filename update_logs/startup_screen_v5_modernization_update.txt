@@ -1,0 +1,54 @@
+================================================================================
+UPDATE LOG: OpenPublisher V5 Adaptive Startup Screen Modernization
+================================================================================
+Date: September 13, 2026
+Component: wrapper.html (Startup & Window Initialization Subsystem)
+
+OVERVIEW:
+Modernized the OpenPublisher desktop startup screen to reflect the Version 5
+release architecture. Replaced legacy Version 4 assets (generic Font Awesome
+printer icon, static gradient, and uncaptioned progress bar) with an adaptive,
+dual-theme startup engine using official V5 vector SVG assets. The startup screen
+automatically switches between a signature elevated teal theme for default/light
+modes and a pro dark studio slate theme when dark mode is enabled.
+
+KEY FIXES & ARCHITECTURAL HIGHLIGHTS:
+1. Adaptive Dual-Theme System:
+   - Default / Light Theme: Features a rich multi-stop radial gradient
+     (#009e94 to #007670 to #004d49) with ambient center lighting, displaying
+     the crisp white inappv5.svg vector logo and a mint-white glowing progress pill.
+   - Dark Mode Theme: Automatically activates when the user has dark mode saved.
+     Features deep studio slate (#090e17) with an ambient cyan/teal radial glow,
+     displaying the full squircle OpenPublisherv5Icon.svg app tile and a cyan/teal
+     gradient progress bar.
+   - Zero-Flicker Head Detection: Injects early theme and dark-mode inspection into
+     the <head> script of wrapper.html before DOM render, reading localStorage
+     (op_saved_theme, opub_ui_theme, op_dark_mode). Non-dark themes (such as
+     Sunset Orange, Classic, Default) are strictly guarded from false dark mode
+     detection.
+   - Stale State Auto-Healing: Automatically cleanses legacy or misflagged
+     "mode":"dark" entries on light/color themes stored in localStorage, preventing
+     unintended dark mode splash displays.
+
+2. Release-Agnostic V5 Branding & Custom Typography:
+   - Displays a clean, prominent 'V5' badge instead of point release numbers,
+     ensuring complete forward compatibility across all V5.x.x versions.
+   - Offline Bundled Typography: Bundled modern web-font assets locally into
+     the fonts/ directory (Plus Jakarta Sans 600/700/800 and Inter 400-800) with
+     fonts/fonts.css to ensure instant, high-fidelity rendering without font flicker
+     or fallback to generic system fonts.
+   - Brand Title: 'OpenPublisher' rendered in Plus Jakarta Sans 800 with subtle
+     drop shadow.
+   - Tagline: 'Free Desktop publishing without ads or subscriptions.' in Inter 500.
+   - Footer: 'OpenPublisher V5 Windows Edition'.
+
+3. Dynamic Status Indicators:
+   - Added #splash-status text that updates in real time during startLoading():
+     * 'Initializing workspace...' (0% to 30%)
+     * 'Loading publishing engine...' (30% to 65%)
+     * 'Preparing canvas...' (65% to 90%)
+     * 'Ready' (100% upon guest webview contentload)
+   - Preserved all native IDs (#splash-screen, #splash-brand, #real-progress-bar)
+     to maintain 100% backward compatibility with offline and crash recovery screens.
+================================================================================
+

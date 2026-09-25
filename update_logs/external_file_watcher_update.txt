@@ -1,0 +1,21 @@
+# External File Modification Watcher Update
+
+## Overview
+Added an `fs.watch` integration to monitor the currently open file (`activeFilePath`) for external modifications. If the file is changed by an external program (e.g., a text editor, another instance, or cloud sync), the app will prompt the user and offer to seamlessly reload the document.
+
+## Implementation Details
+1. **Watcher Management (`setActiveFilePath`)**
+   - Introduced `setActiveFilePath(filePath)` in `wrapper.html` to manage the active file.
+   - Automatically cleans up any previously running `fs.watch` processes before assigning a new one to prevent memory leaks and ghost events.
+   - Bound into all `activeFilePath` changes (Open, Save As, Recent Files, New Document).
+
+2. **Debounce & Reload Logic**
+   - File system events (`change` or `rename`) are debounced using a 500ms timer (`watchDebounceTimer`). This prevents the OS from spamming multiple alerts for a single save operation.
+   - Triggers a native blocking `window.confirm` dialog: *"This file was modified externally. Reload it?"*
+   - If accepted, the app calls `loadAssociatedFile(filePath)` to reload the document data and trigger the standard loading status bar animation.
+
+3. **Collision Prevention (`isAppSaving` lock)**
+   - The app's own internal saves use `atomicSave`, which performs temporary file rotation and `fs.renameSync()`. These operations naturally trigger `fs.watch` events.
+   - Added an `isAppSaving` global lock to `atomicSave`. It turns `true` during the save and resets to `false` after a 2000ms delay.
+   - The watcher ignores any file events while `isAppSaving` is `true`, preventing the app from prompting the user when they simply hit "Save".
+   - `atomicSave` also automatically re-establishes the `fs.watch` connection if the file's underlying inode is replaced by the OS during the atomic rename.

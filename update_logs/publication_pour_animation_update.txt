@@ -1,0 +1,23 @@
+# Update: Smooth Document Content Pour Animation (.opub / .json) & Zero-Flicker Fix
+
+## Summary
+Refined the entrance effect when opening or dropping .opub and .json publication documents. Content elements gracefully pour down the page into place with an organic vertical stagger, accompanied by a semi-transparent teal-green light wave sheen. Completely eliminated the initial flash-of-content (FOUC) glitch by hooking window.handlePublisherFileLoad and immediately clamping newly injected publication elements to a transparent, pre-lifted state (.paper-pouring) before the browser ever paints them.
+
+## Changes
+- Eliminated Initial Render Flash (FOUC Fix):
+  - Previously, dropping a .opub file caused the web application to synchronously insert elements onto #paper at opacity: 1, followed by a 350ms delay before triggering the pour animation—causing the document to flash on screen, abruptly vanish, and re-animate.
+  - Hooked window.handlePublisherFileLoad and the native drag-and-drop listener to synchronously tag #paper with .paper-pouring before the file is read or parsed.
+  - Newly rendered child elements are pre-hidden at opacity: 0 !important; transform: translateY(-22px) !important; filter: blur(2.5px) !important; from the very first paint frame.
+  - In window.playDocumentPourAnimation, inline styles are initialized and .paper-pouring is seamlessly unclamped, allowing the staggered cascade to flow smoothly without any sudden disappearance or pop-in.
+- High-Contrast Teal-Green Wave Sheen (wrapper.html):
+  - Upgraded #paper-pour-curtain from a washed-out white gradient to a smooth semi-transparent teal gradient (rgba(20, 111, 110, 0.35) core with soft glow shadows) that sweeps cleanly down #paper without blending away into the white canvas.
+  - Added smooth opacity fade-out (opacity: 0 transition over 350ms) as the curtain reaches the bottom edge of the document.
+- Removed Dual Animation Conflict on Drop:
+  - Removed the cursor shockwave ripple and badge from .opub / .json file drops. Dropping a publication now triggers solely the elegant sheet pour animation, eliminating visual clutter.
+- Organic Top-to-Bottom Vertical Stagger:
+  - Elements across #paper are sorted by their vertical coordinate (offsetTop / style.top), cascading into place from top to bottom with a spring curve (cubic-bezier(0.16, 1, 0.3, 1)).
+- Non-Destructive Cleanup & Re-entrancy Protection:
+  - Added _isPourAnimating guard and cleanup timer cancellation to prevent overlapping animation artifacts during rapid successive file drops.
+  - All inline animation styles are cleanly restored to their exact original states after 1050ms, leaving page elements completely editable and responsive.
+- Unified Integration:
+  - Automatically triggers whenever a publication document is loaded via drag-and-drop, File -> Open, Recent Files, or launch arguments.

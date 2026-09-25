@@ -1,0 +1,24 @@
+Native Clipboard & Paste Button Integration Update
+
+Overview:
+Added a comprehensive native clipboard integration mechanism for the guest web application. This update handles:
+1. Direct IPC listener (`OP_GET_CLEAN_CLIPBOARD`) for the web app to invoke native clipboard pastes via `webview.paste()`.
+2. A global capture-phase interceptor in `wrapper.html` to silently hijack physical "Paste" UI buttons (both on the ribbon bar and inside the custom right-click context menu), suppressing the web app's default security modal and bridging the click directly into our native implementation.
+
+Changes Made:
+- IPC Listener: Modified `wrapper.html` to intercept `OP_GET_CLEAN_CLIPBOARD` in the `consolemessage` event listener.
+- Native Webview Paste: When triggered, the wrapper executes `webview.paste()`. This perfectly simulates a native OS `Ctrl + V` action, completely bypassing the web app's DOM security restrictions while preserving all native clipboard data (including rich text, images, fonts, and formatting).
+- UI Button Hijacking (Ribbon & Custom Right-Click Menu): Added `document.addEventListener` for `mousedown`, `mouseup`, and `click` in the `mainWorldInjectionCode` to intercept events before they reach the web app's own handlers (using the capture phase).
+- Focus Preservation: By calling `e.preventDefault()` on the `mousedown` event specifically for Paste buttons, we prevent the browser's default behavior of blurring the currently active text input or canvas element. This ensures the native paste drops exactly where your cursor is.
+- Context Menu Support: Extended control detection to include `.pub-context-menu`, `.pub-context-item`, `#minimap-context-menu`, and general dropdown/context items. When a context menu Paste item is clicked:
+  - The context menu is cleanly closed immediately.
+  - The web app's `ContextMenuActions.pasteNormal` security modal is completely suppressed.
+  - The native clipboard fetch IPC event is dispatched.
+- Fallback Method Hook: Hooked `window.ContextMenuActions.pasteNormal` as a secondary safety net to ensure that any programmatic or direct invocations route through `OP_GET_CLEAN_CLIPBOARD` rather than failing on browser permission checks.
+- Smart Identification: The heuristic scans up the DOM tree looking for elements that match UI control signatures (buttons, ribbon controls, dropdowns, context menu items) and contain the word "paste".
+
+Usage:
+No additional code is required in the web app. Both the physical paste button on the ribbon and the "Paste" option in the custom right-click context menu will now silently invoke the native clipboard API exactly like `Ctrl + V`.
+
+If you ever need to trigger this programmatically from the web app, call:
+console.log('OP_IPC:' + JSON.stringify({ type: 'OP_GET_CLEAN_CLIPBOARD' }));

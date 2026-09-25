@@ -1,0 +1,8 @@
+# Update: Dashboard Default Page Initialization Fix
+
+## Summary
+Fixed an issue where closing the web app's dashboard without explicitly selecting a page size would cause the default page to render broken and missing elements in the native wrapper. 
+
+## Changes
+- Protected State Serialization (wrapper.html): The wrapper's injected dirty-checking logic occasionally calls serializeCurrentPage() to establish document baselines. When called unconditionally on startup while the dashboard was active, it scraped an incomplete DOM and corrupted the default state.pages[0] object.
+- Dashboard Visibility Check: Added a new helper _isDashboardOpen() that verifies the visibility of #dashboard-overlay. The wrapper will now safely bypass serializeCurrentPage() calls if the dashboard is open, preserving the native default page state (like A4) so it seamlessly loads when the dashboard is closed.

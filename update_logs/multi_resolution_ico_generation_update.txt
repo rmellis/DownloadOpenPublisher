@@ -1,0 +1,60 @@
+================================================================================
+UPDATE LOG: OpenPublisher V5 Multi-Resolution ICO Generation
+================================================================================
+Date: September 19, 2026
+Component: icons/ directory (Icon Assets & Packaging Resources)
+
+OVERVIEW:
+Generated multi-resolution Windows .ico files and standalone single-size .ico files
+from the 4 PNG assets in the root icons directory:
+1. OpenPublisherv5Icon.png (Source: 1673x1673 RGBA)
+2. opubDocument.png (Source: 256x256 RGBA)
+3. Publication-icon-32x42.png (Source: 38x42 RGBA)
+4. openoublisherv5st-icon.png (Source: 32x32 RGBA)
+
+WINDOWS ICO RESOLUTION ARCHITECTURE:
+Windows .ico containers natively support embedding multiple resolution frames into
+a single file. The standard maximum size for Windows icons is 256x256 pixels, which
+uses PNG compression to retain full 32-bit alpha transparency while minimizing file
+size.
+
+1. Master Multi-Resolution .ico Files:
+   Generated directly in the icons/ directory:
+   - OpenPublisherv5Icon.ico (10 frames embedded, ~101 KB)
+   - opubDocument.ico (10 frames embedded, ~130 KB)
+   - Publication-icon-32x42.ico (10 frames embedded, ~102 KB)
+   - openoublisherv5st-icon.ico (10 frames embedded, ~53 KB)
+
+   Each master .ico contains the complete Windows standard resolution hierarchy:
+   - 16x16: Taskbar, notifications, small list view (100% DPI)
+   - 20x20: High-DPI 125% scaling for 16x16
+   - 24x24: High-DPI 150% scaling for 16x16 / small taskbar
+   - 32x32: Standard desktop icon, File Explorer tiles (100% DPI)
+   - 40x40: High-DPI 125% scaling for 32x32
+   - 48x48: Medium icons, dialog boxes, Control Panel (100% DPI)
+   - 64x64: High-DPI 200% scaling for 32x32 / extra-large icon
+   - 96x96: High-DPI 200% scaling for 48x48
+   - 128x128: Jumbo icon
+   - 256x256: Maximum standard Windows icon size (Vista, Win 7, 8, 10, 11)
+
+2. Standalone Single-Resolution .ico Files:
+   Generated in icons/individual_sizes/ for compilers, build scripts, or web tools
+   requiring discrete icon files:
+   - <icon_name>_16x16.ico
+   - <icon_name>_20x20.ico
+   - <icon_name>_24x24.ico
+   - <icon_name>_32x32.ico
+   - <icon_name>_40x40.ico
+   - <icon_name>_48x48.ico
+   - <icon_name>_64x64.ico
+   - <icon_name>_96x96.ico
+   - <icon_name>_128x128.ico
+   - <icon_name>_256x256.ico
+   Total individual files created: 40 (10 sizes x 4 icons).
+
+3. Aspect-Ratio Safe Fitting:
+   - Square assets (OpenPublisherv5Icon, opubDocument, openoublisherv5st-icon)
+     were resampled using high-fidelity Lanczos filtering.
+   - Non-square asset (Publication-icon-32x42) was proportionally scaled and
+     centered on a transparent square canvas to prevent distortion or stretching.
+================================================================================

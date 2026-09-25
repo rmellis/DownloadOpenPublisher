@@ -1,0 +1,19 @@
+# Update: Show in File Explorer Button (nw.Shell.showItemInFolder)
+
+## Summary
+Added a native "Show in Folder" button to the titlebar controls in wrapper.html. Clicking it immediately opens the native OS File Explorer with the active document highlighted via 
+w.Shell.showItemInFolder(activeFilePath).
+
+## Changes & Implementation Details
+- **UI & Icon**:
+  - Placed a stylish folder icon button (#open-folder-btn) in #controls-wrapper, sitting adjacent to the Recent Files and Pin Window buttons.
+  - Styled with the same translucent glass aesthetic (gba(255, 255, 255, 0.12)), hover glow, click press animation, and rounded borders.
+- **Dynamic State & Tooltip**:
+  - Linked to ctiveFilePath lifecycle (setActiveFilePath):
+    - When a document is active: button is enabled and tooltip dynamically shows Show "<filename>" in File Explorer.
+    - When no document has been saved/loaded yet: button is subtly dimmed (opacity: 0.35; cursor: default;) and tooltip displays No active document saved yet.
+- **Native OS Shell Action**:
+  - When clicked while a document is active, calls 
+w.Shell.showItemInFolder(activeFilePath), immediately launching Windows File Explorer and selecting the file.
+- **Responsive Layout Safeguards**:
+  - Integrated into updateTopbarButtonsVisibility() with a breakpoint threshold (1040px) to prevent overlapping the document title pill on narrower screens.

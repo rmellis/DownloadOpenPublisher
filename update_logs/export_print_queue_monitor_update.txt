@@ -1,0 +1,47 @@
+================================================================================
+UPDATE LOG: Export & Print Queue Monitor (Queue Management & Multi-Page Print)
+================================================================================
+Date: September 13, 2026
+Component: wrapper.html & export_queue.html (Export & Print Queue Subsystem)
+
+OVERVIEW:
+Implemented a dedicated, standalone Export & Print Queue Monitor window
+(export_queue.html) powered by NW.js multi-window architecture. Provides real-time
+job tracking, progress visualization, file management, and robust integration with
+the OpenPublisher page serializer for multi-page export and print jobs.
+
+KEY FEATURES & ARCHITECTURAL HIGHLIGHTS:
+1. Standalone Tearaway Architecture (export_queue.html):
+   - Frameless, translucent dark-glass aesthetic with native OS window dragging
+     via -webkit-app-region: drag and fallback event listeners.
+   - Sized at 720x520 default with multi-monitor positioning support.
+   - Dynamic theme color synchronization driven by OpenPublisher's active theme.
+
+2. Webapp Print Pipeline Redirection & Multi-Page Serialization:
+   - Fixed print pipeline integration: print requests from the queue monitor are
+     routed directly through the webapp's native page serializer.
+   - Resolves previous single-page limitation by ensuring all pages and layouts
+     are properly serialized and sent to the system print spooler.
+   - Completely bypasses html2canvas to maintain high-resolution vector output.
+
+3. Smooth Progress Monitoring:
+   - Resolved progress bar jitter during print execution (smooth 2-second progression
+     curve without erratic step-backs or shaking).
+   - Real-time percentage counters and status indicators for Print, PDF, and PNG exports.
+   - Updated engine status badge branding to "Process: OpenPublisher Node Pipeline".
+
+4. Job Management & Output Actions:
+   - Detailed queue history listing completed, in-progress, and failed jobs.
+   - "Open in Folder" (nw.Shell.showItemInFolder) and direct file launch integration.
+   - Clear history action and job filter options (All, Print, PDF, Image).
+
+5. Single-Instance Protection & Auto-Teardown:
+   - Opening mutex prevents duplicate queue monitor windows from opening concurrently.
+   - Subsequent button clicks focus and bring the existing monitor forward.
+   - Fail-safe heartbeat listener auto-closes the monitor if OpenPublisher closes.
+
+VERIFICATION:
+- Verified multi-page print redirection through the webapp print engine.
+- Tested progress bar smoothness during export cycles across PDF, PNG, and Print.
+- Confirmed single-instance enforcement and clean child-window teardown on exit.
+================================================================================

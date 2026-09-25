@@ -1,0 +1,13 @@
+# Single Instance Update
+
+## Overview
+Prevented the application from accidentally launching duplicate OpenPublisher windows when opening a second `.opub` file from the OS. Instead, the OS passes the file to the currently running instance.
+
+## Implementation Details
+1. **Manifest Configuration (`package.json`)**
+   - Added `"single-instance": true` to explicitly instruct NW.js to route new launches to the existing instance and automatically quit the duplicate process.
+   
+2. **Window Focus (`wrapper.html`)**
+   - Updated the `nw.App.on('open')` event listener.
+   - When a second file is opened, the running instance receives the command-line arguments, parses the file path, and calls `loadAssociatedFile()`.
+   - Added `currentWindow.restore()` and `currentWindow.focus()` so that if the existing OpenPublisher window is minimized or behind other apps, it immediately jumps to the foreground and presents the newly opened document.

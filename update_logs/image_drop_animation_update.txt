@@ -1,0 +1,12 @@
+# Update: Animated Image Drop Effect (Ripple, Sparkle & Badge)
+
+## Summary
+Added a visual impact animation when dropping image assets onto the publication. The desktop wrapper intercepts the exact drop coordinates and renders a high-contrast, semi-transparent teal-green shockwave ripple, particle burst, and floating badge that is clearly visible across white pages and canvases.
+
+## Changes
+- Semi-Transparent Teal-Green Ripples (wrapper.html): Upgraded .asset-drop-ripple and .asset-drop-ripple-outer from thin/white borders to bold semi-transparent teal-green (rgba(20, 111, 110, 0.85) and rgba(20, 111, 110, 0.5)) featuring a radial gradient water-droplet wash inside. This ensures the shockwave pops crisply and legibly against pure white paper backgrounds.
+- Teal-Green Particle Sparks: The radial 360° sparkle burst particles now use teal-green with soft glow shadows (rgba(20, 111, 110, 0.85)), providing strong contrast over white documents.
+- Tactile Glassmorphism Pill Badge: Injects a spring-animated badge (.asset-drop-badge) showing a photo icon and the asset's filename using theme background and backdrop blur. The badge pops in with a bouncy spring curve, pauses briefly, and dissolves upward as the asset is placed.
+- Bi-Directional Coordinate Tracking: Both direct webview canvas drops and wrapper chrome drops transmit the cursor's (x, y) position to ensure the animation centers precisely where the user released the mouse.
+- Webview Status Bar Toast: Dynamically updates the document status bar (#status-msg) to "Imported: <filename>" for two seconds upon arrival.
+- Clean Lifecycle: The entire animation is non-destructive, non-blocking (pointer-events: none), and automatically cleans up its DOM nodes after 950ms.

@@ -1,0 +1,16 @@
+# Update: Native Fullscreen Toggle (F11)
+
+## Summary
+Added support for toggling native fullscreen mode in wrapper.html using the F11 key, with robust UI syncing, focus-loss prevention, and dynamic window controls.
+
+## Changes & Implementation Details
+- **Keydown Interception & Webview IPC**:
+  - Attached a global keydown listener to intercept the F11 key in wrapper.html to invoke 
+w.Window.get().enterFullscreen() and leaveFullscreen().
+  - Injected an F11 listener into the <webview> itself, bridged via the OP_TOGGLE_FULLSCREEN IPC message. This absolutely prevents F11 from breaking if the user clicks inside the publication workspace (focus loss).
+- **Dynamic UI Transformation**:
+  - The #controls-wrapper (including Recent Files, Pin, and close/maximize buttons) remains visibly layered on top of the fullscreen workspace.
+  - The "Maximize" window control buttons were updated to intelligently call win.leaveFullscreen() if the app is currently in fullscreen mode, providing a convenient mouse-driven exit route.
+  - Removes native window shadow paddings (15px) and border radius by applying the .maximized layout properties during fullscreen, allowing the <webview> to naturally scale to 100%.
+  - Hides #drag-zone windows internally since fullscreen frames cannot be dragged.
+  - Uses explicit display: flex/block style resets to guarantee no rendering engine glitches when restoring window elements after toggling repeatedly.

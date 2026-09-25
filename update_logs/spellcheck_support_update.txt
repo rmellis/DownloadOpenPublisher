@@ -1,0 +1,10 @@
+# Native Spellcheck & Misspelling Highlight Support
+
+## Overview
+Enabled native spellchecking across all text boxes, textareas, and canvas-editable elements in OpenPublisher so misspelled words are highlighted with native red squiggly underlines identical to standard web browsers (Chrome, Edge, and Firefox).
+
+## Changes Made
+1. **Chromium Engine Flags (package.json)**: Added --enable-spell-checking and --enable-features=WinUseBrowserSpellChecker to chromium-args to activate Chromium's spellcheck engine and connect to the Windows OS native spellcheck platform.
+2. **Dictionary Provisioning (dictionaries/)**: Bundled and auto-provisioned offline Hunspell .bdic dictionaries (en-US and en-GB) directly to the application directory and NW.js User Data\Dictionaries, resolving the issue where NW.js lacked downloadable dictionaries.
+3. **Preferences Configuration**: Configured spellcheck.dictionaries in the user profile to activate both British English (en-GB) and American English (en-US).
+4. **DOM Spellcheck Enforcer (wrapper.html)**: Injected an automated observer inside the webview that guarantees all current and dynamically created text boxes, canvas text frames, inputs, and contenteditable elements have spellcheck="true" enabled.

@@ -1,0 +1,15 @@
+# Update: Taskbar Flashing Attention (requestAttention)
+
+## Summary
+Expanded the OP_EXPORT_COMPLETE and save-complete IPC listeners in wrapper.html to trigger the OS taskbar flash using 
+w.Window.get().requestAttention(true) when saving or exporting finishes. Added focus event handlers to automatically stop the flashing as soon as the user clicks back into the window.
+
+## Changes & Implementation Details
+- **Taskbar Flash on Export / Save Complete**:
+  - In OP_EXPORT_COMPLETE and OP_SAVE_DATA completion blocks, added 
+w.Window.get().requestAttention(true).
+  - On Windows, this causes the taskbar button for Open Publisher to flash/glow, notifying the user that their export or save has successfully finished even if the application is running in the background or minimized.
+- **Auto-Dismiss Flashing on Focus**:
+  - Added a win.on('focus') listener to the native NW.js window calling 
+w.Window.get().requestAttention(false).
+  - Also attached focus listeners to window and <webview> to immediately cancel the taskbar flashing the moment the user clicks anywhere back inside the application.

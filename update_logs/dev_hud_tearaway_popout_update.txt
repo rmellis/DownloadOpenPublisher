@@ -1,0 +1,77 @@
+================================================================================
+UPDATE LOG: Developer HUD Tearaway Pop-Out Window (Standalone Window Architecture)
+================================================================================
+Date: September 13, 2026
+Component: wrapper.html & hud.html (Developer HUD & Multi-Window Subsystem)
+
+OVERVIEW:
+Resolved the issue where the Developer HUD remained locked inside the main window
+and became undraggable. The tearaway pop-out feature now utilizes a dedicated
+native window page (hud.html) powered by NW.js multi-window capabilities.
+
+When the user clicks "Pop Out", the in-app HUD overlay is immediately hidden from
+within OpenPublisher and an independent, frameless, transparent desktop window
+opens adjacent to the app. The popped-out HUD can be freely dragged across any
+desktop monitor, outside the bounds of OpenPublisher, using hardware-accelerated
+OS dragging.
+
+KEY FIXES & ARCHITECTURAL HIGHLIGHTS:
+1. Dedicated Native Window Architecture (hud.html):
+   - Eliminated cross-document appendChild DOM transfer, which previously caused
+     null document/origin errors in Chromium that trapped the HUD inside the window
+     and disabled dragging.
+   - Built a dedicated standalone window (hud.html) with matching brand styling,
+     theme variables (--bg-color, --accent-color), and complete controls.
+   - Native OS dragging is enabled on the header via `-webkit-app-region: drag`
+     while all buttons, sliders, and interactive areas maintain `-webkit-app-region: no-drag`.
+
+2. True Tearaway Behavior:
+   - Clicking "Pop Out" (#dev-mode-popout) hides the in-app overlay from wrapper.html
+     (style.display = 'none') and opens the external floating window.
+   - The detached window can be moved anywhere across multiple screens without
+     being restricted by OpenPublisher's viewport.
+   - Clicking "Dock" on the detached window closes the pop-out and smoothly
+     restores the docked HUD inside OpenPublisher.
+
+3. Keyboard Shortcut (Ctrl+Shift+D) & Docking Flow:
+   - Pressing Ctrl+Shift+D while the tearaway window is open (from within
+     OpenPublisher, the webview editor, or inside the detached HUD itself)
+     closes the floating window and deactivates Dev Mode on the app.
+   - Pressing Ctrl+Shift+D again subsequently reactivates Dev Mode, displaying
+     the HUD docked inside the main window.
+   - Closing the detached window via OS (Alt+F4 or taskbar close) cleanly
+     deactivates Dev Mode and resets state.
+
+4. Bidirectional Event & Action Bridge:
+   - Added global action bridges between the host app and the detached HUD:
+     Reload App, Reload View, App DevTools, View DevTools, Open AppData,
+     Backup Manager, Previous Versions, Reboot Safe, and Crash Simulation.
+   - Preference toggles (Close to System Tray, Log IPC Traffic) synchronize
+     instantaneously across both windows and persist to localStorage.
+
+5. Unified Live Data Broadcasting:
+   - Implemented `getDevElements(id)` broadcasting: memory footprint history,
+     dynamic bar charts, live RSS rates, Webview FPS, and bidirectional IPC
+     logs update in real time across both the main window and the detached HUD.
+
+6. Header Grab & Drag Hit-Testing Optimization:
+   - Eliminated the 4-way crosshair / selection cursor ("crophear selection cross")
+     by removing `cursor: move` and enforcing `cursor: default !important` across
+     the entire header bar.
+   - Added `pointer-events: none !important`, `user-select: none !important`, and
+     explicit `-webkit-app-region: drag !important` on `.dev-header-left` and all its
+     child elements (the green pulse dot and the title text). This eliminates DOM
+     event interception over text/icons that previously created dead zones where
+     dragging failed.
+   - The entire header area (over the text, pulse dot, and empty space up to the
+     dock/close buttons) now serves as an unbroken, zero-latency drag region.
+   - Added a JavaScript mousedown/mousemove window drag fallback (`win.moveTo`)
+     in hud.html to ensure 100% grab responsiveness across all monitors.
+
+VERIFICATION:
+- Confirmed syntax validation across wrapper.html and hud.html.
+- Automated tests passed for spawn positioning, header controls, and dock logic.
+- Playwright hit-test suite verified default arrow cursor, pointer-events pass-through,
+  and drag region coverage across all points of the header bar.
+- Playwright visual rendering verified for the standalone transparent HUD window.
+================================================================================

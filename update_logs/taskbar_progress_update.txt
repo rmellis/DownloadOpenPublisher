@@ -1,0 +1,14 @@
+# OS Taskbar Progress Integration
+
+## Overview
+Integrated OpenPublisher's save and export system directly with the native OS taskbar. During file I/O operations, the application's taskbar icon will now visually display an indeterminate progress animation to indicate active background processing.
+
+## Key Features & Implementation
+
+1. **Native OS Progress API**
+   - Utilized `nw.Window.get().setProgressBar(2)` to trigger an indeterminate (marquee) progress state on the native OS taskbar.
+   - Tied directly into the `startDesktopSaveAnimation` bridge so that both the in-app UI and the OS taskbar sync perfectly when an atomic save or "Save As" operation begins.
+
+2. **Clean State Resolution**
+   - Automatically calls `win.setProgressBar(-1)` immediately upon completion alongside `finishDesktopSaveAnimation`.
+   - Ensures the taskbar cleanly reverts to its default state without leaving frozen progress bars on the user's screen.

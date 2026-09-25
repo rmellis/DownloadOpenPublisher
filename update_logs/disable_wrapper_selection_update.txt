@@ -1,0 +1,13 @@
+# Update: Prevent Accidental Wrapper Selection & Dragging
+
+## Summary
+Disabled text selection highlighting and accidental dragging on all wrapper chrome elements (such as the Recent Documents dropdown, titlebar buttons, headers, and overlay menus), giving the shell a native desktop application feel.
+
+## Changes & Implementation Details
+- **Global CSS Rules**:
+  - Added universal rules user-select: none, -webkit-user-select: none, and -webkit-user-drag: none across html, ody, and all wrapper chrome DOM elements (*, *::before, *::after).
+  - Completely eliminates blue highlight boxes and ghost dragging when clicking, clicking-and-dragging, or double-clicking anywhere on wrapper chrome (e.g. Recent Documents menu items, paths, headers, and buttons).
+- **Recent Files Icon Dragging Disabled**:
+  - Explicitly added draggable="false" to the .rf-item-icon image tags in the Recent Documents list.
+- **JavaScript Event Safeguards**:
+  - Added global selectstart and dragstart event listeners on window to intercept and cancel any selection or dragging originating outside the <webview>, while preserving full text editing and selection within the publication workspace.

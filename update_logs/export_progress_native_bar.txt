@@ -1,0 +1,8 @@
+# Update: Native Export Progress Bar
+
+## Summary
+Added support for real-time native progress bars on the Windows Taskbar and macOS Dock during file exports. The wrapper now dynamically tracks export progress alongside the web app and reflects it on the OS-level application icon.
+
+## Changes
+- IPC Event Interception: Added a new IPC listener for OP_EXPORT_PROGRESS in wrapper.html.
+- Native Loading Bar Integration: The wrapper extracts the numeric percentage from the payload and seamlessly feeds it into the NW.js win.setProgressBar() API, converting it to the required 0.0-1.0 float format. This perfectly overrides the indeterminate progress state set by OP_EXPORT_START and provides buttery smooth visual feedback directly on the desktop dock/taskbar until OP_EXPORT_COMPLETE clears it.

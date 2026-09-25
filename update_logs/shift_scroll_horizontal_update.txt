@@ -1,0 +1,33 @@
+===============================================================================
+OPENPUBLISHER UPDATE: FULL CANVAS PASTEBOARD & SHIFT + SCROLL HORIZONTAL SCROLLING
+===============================================================================
+
+DATE: September 12, 2026
+MODULE MODIFIED: wrapper.html
+
+PROBLEM SUMMARY:
+1. When on the default 60% zoom, the page fits within the viewport width on wide
+   screens. In previous builds, because the scaled page fit inside the viewport,
+   horizontal scroll was prevented (maxScrollLeft was 0), meaning the user could
+   not scroll the page left and right across the canvas like in the browser.
+2. At 150% zoom, horizontal scroll previously stopped right at the page margin
+   instead of scrolling past the page.
+
+IMPLEMENTED SOLUTION:
+Enhanced the webview injection in wrapper.html with a full pasteboard canvas engine:
+1. Full Canvas Pasteboard Margins (60% Default & All Zoom Levels):
+   - Establishes a full pasteboard margin (equal to the larger of 80% viewport width
+     or the scaled paper width) on both the left and right sides of the paper.
+   - Allows the user to scroll the ENTIRE page left and right across the canvas at
+     any zoom level, including the default 60% zoom, 100% zoom, and 150% zoom.
+   - Automatically centers the page on initial load and when clicking "Fit to Page"
+     or "Fit to Width", while preserving full scrollability in both directions.
+   - Smoothly preserves the user's relative horizontal scroll position during zoom
+     slider and Ctrl+Wheel zooming transitions.
+2. Complete Ruler & Margin Guide Synchronization:
+   - Tracks the paper position dynamically with sub-pixel precision across all
+     scroll offsets and zoom levels.
+3. Universal Shift + Wheel Horizontal Scrolling:
+   - Translates Shift + MouseWheel deltas into smooth horizontal scroll movements
+     across the entire canvas.
+===============================================================================

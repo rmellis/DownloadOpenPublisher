@@ -1,0 +1,61 @@
+================================================================================
+UPDATE LOG: OpenPublisher V5 Cross-Platform Architecture & Readiness Audit
+================================================================================
+Date: September 19, 2026
+Component: wrapper.html, package.json, Cross-Platform System Integration
+
+OVERVIEW:
+Comprehensive cross-platform compatibility audit and hardening performed across
+wrapper.html and the OpenPublisher V5 runtime environment to prepare for packaging
+across Windows, macOS, Linux, and FreeBSD (supporting both NW.js and future Electron
+variants).
+
+KEY AUDIT FINDINGS & COMPATIBILITY ENHANCEMENTS:
+
+1. Dynamic Menu Accelerators (macOS vs Windows/Linux/FreeBSD):
+   - Previously, all application menubar accelerator shortcuts in setupApplicationMenuBar()
+     hardcoded "modifiers: 'ctrl'".
+   - On macOS, this prevented standard Apple shortcuts and required pressing the physical Control
+     key instead of the Command key.
+   - Upgraded accelerator definitions to dynamically evaluate:
+       const menuMod = (typeof process !== 'undefined' && process.platform === 'darwin') ? 'cmd' : 'ctrl';
+       const menuShiftMod = (typeof process !== 'undefined' && process.platform === 'darwin') ? 'cmd+shift' : 'ctrl+shift';
+   - Applied menuMod and menuShiftMod across all menus (File, Edit, View, Insert, Arrange,
+     Tools, Help).
+
+2. Cross-Platform Font Detection & Multi-OS Font Stacks:
+   - Previously, detectWindowsSystemFonts() executed a Windows registry query ("reg query")
+     unconditionally on all operating systems, failing on macOS, Linux, and FreeBSD.
+   - Re-engineered as detectSystemFonts() with comprehensive multi-OS support:
+     * macOS (darwin): Returns a curated palette of 53 native Apple system typography families
+       (-apple-system, Helvetica Neue, San Francisco, Menlo, Avenir Next, Optima, etc.).
+     * Linux & FreeBSD: Executes standard fontconfig command "fc-list : family | sort -u" with
+       graceful fallback to 39 standard desktop families (Ubuntu, Liberation Sans, DejaVu Sans,
+       Noto Sans, Fira Code, Roboto, etc.).
+     * Windows (win32): Continues querying HKLM and HKCU registry keys with fallback to 54
+       standard Windows font families.
+
+3. Path Normalization & Filesystem Safety:
+   - Verified that zero hardcoded Windows drive letters (such as "C:\") exist in wrapper.html.
+   - Audited all 31 subwindow and asset relative paths for strict case-sensitivity
+     compliance on ext4 (Linux) and ZFS/UFS (FreeBSD).
+   - Fixed a duplicated path resolution prefix for inappv5.svg (assets/icons/assets/icons/inappv5.svg
+     corrected to assets/icons/inappv5.svg).
+   - Hardened crash log generation:
+       const desktopCandidate = path.join(os.homedir(), 'Desktop');
+       const desktopPath = fs.existsSync(desktopCandidate) ? desktopCandidate : os.homedir();
+     Prevents file-writing failures on headless servers, containers, or minimal BSD/Linux environments
+     where ~/Desktop is absent.
+
+4. Native Windows Binary Guarding:
+   - Verified that op_native_menu.exe (the native Win32 binary for MyDockFinder menu syncing)
+     is strictly gated by "if (process.platform !== 'win32') return;".
+   - Verified that macOS window menu integration ("win.menu = appMenuBar") is strictly gated
+     by "if (process.platform === 'darwin')".
+
+5. Electron & NW.js Cross-Runtime Compatibility:
+   - System APIs (child_process, fs, path, os, shell) are guarded defensively.
+   - Keyboard listener shortcuts throughout the document use "(e.ctrlKey || e.metaKey)"
+     ensuring complete key command parity across macOS Command and Windows/Linux Control.
+   - Ready for native multi-platform packaging.
+================================================================================

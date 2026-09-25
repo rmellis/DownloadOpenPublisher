@@ -1,0 +1,25 @@
+# System Tray Integration Update
+
+## Overview
+Implemented a native system tray application icon using the `nw.Tray` and `nw.Menu` APIs within `wrapper.html`. The tray icon provides quick access to core application features globally from the OS taskbar and allows the application to be cleanly hidden or restored.
+
+## Key Features & Implementation
+
+1. **Native Tray Icon & Window Restoration**
+   - Initialized `nw.Tray` using the `openoublisherv5st-icon.png` asset.
+   - Left-clicking the tray icon natively restores, shows, and focuses the OpenPublisher window.
+   - Hooked into `win.on('minimize')` and `win.on('restore')` to track visibility state accurately.
+
+2. **Professional Dynamic Jump List (Tray Menu)**
+   - Replaced the basic menu with a structured, professional MS Publisher-style layout:
+     - **Hide to Tray / Show Window**: A dynamic toggle that updates its label based on the app's current visibility state.
+     - **New Blank Publication**: Safely breaks out of the webview's isolated world to trigger `window.handleNewDocument()` natively.
+     - **Open Publication...**: Triggers the internal `#file-open` dialog.
+     - **Save Publication**: Triggers the internal `#file-save` action.
+     - **Recent Publications Submenu**: A dynamic native submenu populated by reading the local `getRecentFiles()`. Includes an integrated 'Clear Recent History' option.
+     - **Debug HUD**: Direct launch toggle for the Developer Mode overlay.
+     - **Exit OpenPublisher**: Triggers the custom safety modal to prevent accidental unsaved data loss before closing.
+
+3. **Background Sync & Cleanup**
+   - **Dynamic Menu Reconstruction**: Monkey-patched the global `renderRecentFiles()` function to automatically rebuild the tray menu. This ensures the *Recent Publications* submenu stays perfectly synchronized whenever a file is opened or cleared within the app.
+   - **Reload Safety Guard**: Added a `window.addEventListener('beforeunload')` hook to explicitly call `tray.remove()`. This ensures that when the wrapper is hot-reloaded (e.g., via the Debug HUD), ghost duplicate tray icons are not left abandoned in the Windows taskbar.

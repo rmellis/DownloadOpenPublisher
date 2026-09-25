@@ -1,0 +1,10 @@
+# Dedicated Backup and Recovery Directory Migration
+
+## Overview
+Relocated .bak safe-save rotation files to a dedicated system backup directory to eliminate file clutter in working folders while maintaining full recovery protection.
+
+## Changes Made
+1. **Dedicated System Backup Directory**: Implemented getBackupDirectory() which routes backup rotation to AppData\Local\OpenPublisher\User Data\Default\Backups (with a safe fallback to %TEMP%\OpenPublisher-Backups).
+2. **Working Directory Clutter Elimination**: Updated atomicSave() to write .bak copies directly into the system backup folder instead of creating .bak files alongside the original project file.
+3. **Legacy Backup Cleanup**: Added automated cleanup in atomicSave() that automatically unlinks and removes any legacy .bak files remaining in the document working directory whenever the document is saved.
+4. **Dev HUD Direct Access**: Added an "Open Backups" quick action button in the Developer HUD to open the recovery directory directly in Windows File Explorer.

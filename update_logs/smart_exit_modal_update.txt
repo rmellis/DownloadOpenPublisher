@@ -1,0 +1,15 @@
+# Update: Smart Exit Modal (Dirty State Checking)
+
+## Summary
+Updated the wrapper's close buttons to intelligently check if the document has unsaved changes before warning the user. If the document is "clean" (no unsaved changes since the last save or since it was opened), the app closes immediately without showing the exit modal.
+
+## Changes & Implementation Details
+- **Dirty State Baseline Tracking**:
+  - Injected logic into the webview's mainWorldInjectionCode to snapshot and track the document's serialized state (_lastSavedData).
+  - The baseline updates automatically on launch, when saving, and when opening new/existing files.
+- **OP_CHECK_DIRTY IPC Bridge**:
+  - The #win-close and #mac-close buttons in wrapper.html no longer call showExitModal() directly. Instead, they use webview.executeScript to post an OP_CHECK_DIRTY message into the webview.
+  - The webview serializes its current state and compares it to the baseline. It responds to the wrapper with an OP_DIRTY_RESPONSE IPC message.
+- **Conditional Exit Modal**:
+  - If the webview reports 	rue (dirty), the wrapper shows the custom exit modal, warning the user about unsaved changes.
+  - If it reports alse (clean), the wrapper bypasses the modal, saves the window bounds, and immediately calls win.close(true).

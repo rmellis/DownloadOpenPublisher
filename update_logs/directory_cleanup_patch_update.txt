@@ -1,0 +1,519 @@
+================================================================================
+UPDATE LOG: OpenPublisher V5 Comprehensive Workspace Directory Tidy-Up Patch
+================================================================================
+Date: September 19, 2026
+Component: Project Root Architecture, Asset Organization, Subwindows, & Cleanup
+
+OVERVIEW:
+Implemented a comprehensive, application-wide directory tidy-up patch for
+OpenPublisher V5. This patch resolves directory sprawl by categorizing and
+relocating all scattered companion subwindows, user interface graphics, system
+tray icons, multi-format branding assets, and video files out of the main project
+root into a modular, clean folder structure.
+
+In addition, obsolete developmental scratch directories, temporary comparison
+artifacts, scrap scripts, empty logs, and duplicate Chromium spellcheck files
+have been purged. All 65 historical update logs have been consolidated into a
+dedicated 'update_logs/' archive, leaving the project root completely pristine.
+All relative paths across wrapper.html, package.json, and auxiliary windows
+have been relinked and verified via headless automated testing.
+
+================================================================================
+SECTION 1: WORKSPACE ARCHITECTURE & DIRECTORY REORGANIZATION
+================================================================================
+
+1. Dedicated Subwindow Directory ('windows/'):
+   - Relocated 7 companion subwindows and their auxiliary styles from the root
+     into a clean, cohesive 'windows/' directory:
+     * windows/hud.html (OpenPublisher Developer HUD Overlay)
+     * windows/ipc_sniffer.html (IPC Event Sniffer & Real-time Console)
+     * windows/quick_actions.html (HUD Tearaway Tool Palette)
+     * windows/doc_preview.html (Live Presentation & Document Preview)
+     * windows/export_queue.html (Export & Print Queue Monitor)
+     * windows/backup_mgr.html (OpenPublisher Backup Manager)
+     * windows/prev_versions.html (Previous Versions & Snapshot Manager)
+     * windows/wa_rules.css (Style definitions for live document preview)
+   - Codebase Relinking:
+     * Updated all nw.Window.open(...) invocations in wrapper.html to reference
+       'windows/[subwindow].html'.
+     * Updated windows/prev_versions.html notification icon to reference
+       '../assets/icons/openoublisherv5st-icon.png'.
+     * Confirmed windows/doc_preview.html loads co-located 'wa_rules.css' seamlessly.
+
+2. Modular Asset Directory Hierarchy ('assets/'):
+   - Consolidated scattered media and graphics into dedicated functional subfolders:
+     * assets/icons/:
+       - openoublisherv5st-icon.png: Application taskbar icon, system tray icon,
+         and in-app notifications.
+       - Publication-icon-32x42.png: Recent files document thumbnail icon.
+       - inappv5.svg: In-app vector badge and desktop shortcut icon.
+       - opubDocument.png: Primary window icon specified in package.json.
+     * assets/ui/:
+       - cr.png: High-resolution crash recovery modal illustration.
+     * assets/branding/:
+       - Multi-resolution icons: OpenPublisherV5.ico, OpenPublisherV5.icns,
+         document-icon.ico, OpenPublisherv5Icon.png, OpenPublisherv5Icon.svg,
+         OpenPulisherV4Icon.svg, Publication-icon-64px.png, 128px, 256px,
+         512px, and 2k.
+     * assets/media/:
+       - OpenPublisherV5boot.mp4: High-definition boot video animation.
+       - clippy-unofficial.webp: Clippy easter egg assistant graphic.
+
+3. Developmental Scratch & Clutter Purge:
+   - Purged obsolete temporary directories:
+     * scratch/ (temporary comparison HTML mockups and frame dumps from wizard).
+     * TEMP-TEST/ (temporary test publication documents).
+   - Purged scrap scripts and empty logs:
+     * captured_code.js (stale DOM scraping debug snippet).
+     * crash_preview.htm (legacy mockup of renderer crash UI).
+     * debug.log (stale chromium debug log).
+     * nw_log.txt (0-byte empty log file).
+   - Purged duplicate spellcheck dictionary binaries from root:
+     * en-GB.bdic, en-GB-10-1.bdic, en-US.bdic, en-US-10-1.bdic (confirmed
+       byte-for-byte identical to files already existing in dictionaries/).
+
+4. Historical Update Log Archiving ('update_logs/'):
+   - Consolidated all 65 individual feature and fix update logs into 'update_logs/',
+     retaining complete historical release logs while keeping the root directory
+     focused purely on application binaries and manifests.
+
+5. Codebase Relinking & Manifest Updates:
+   - package.json: Updated "icon" from "opubDocument.png" to
+     "assets/icons/opubDocument.png".
+   - wrapper.html:
+     * Updated image tags for cr.png to 'assets/ui/cr.png'.
+     * Updated image tags and notification iconUrl entries to
+       'assets/icons/openoublisherv5st-icon.png'.
+     * Updated recent files list template icon to
+       'assets/icons/Publication-icon-32x42.png'.
+     * Updated shortcut creation icon to 'assets/icons/inappv5.svg'.
+     * Hardened tray icon cache-bust path resolution with baseDir fallback
+       to prevent runtime ReferenceError when __dirname is unavailable.
+
+================================================================================
+SECTION 2: AUTOMATED VERIFICATION & TEST RESULTS
+================================================================================
+
+- Automated Playwright Test Suite:
+  * First Run Wizard (8 Slides): 100% pass rate. All images load with full
+    naturalWidth dimensions from firstrun_assets/slides/.
+  * Slide 6 Theme Switching: 100% pass rate. Dark mode and light theme previews
+    switch dynamically from firstrun_assets/themes/.
+  * In-App Asset Loading: 100% pass rate. Crash recovery image (assets/ui/cr.png)
+    and OpenPublisher logo (assets/icons/openoublisherv5st-icon.png) resolve
+    with zero 404 errors.
+  * Subwindow Tearaway & Navigation: 100% pass rate. All 7 popout subwindows
+    (hud.html, ipc_sniffer.html, quick_actions.html, doc_preview.html,
+    export_queue.html, backup_mgr.html, prev_versions.html) spawn and load
+    cleanly from windows/.
+  * Broken Link Audit: 0 broken relative references across the entire codebase.
+
+================================================================================
+SECTION 3: INCLUDED FIRST RUN WIZARD UPDATE LOG
+================================================================================
+
+================================================================================
+UPDATE LOG: OpenPublisher V5 First Run Wizard & Onboarding Subsystem
+================================================================================
+Date: September 18, 2026
+Component: wrapper.html (Startup, Splash Screen, & Onboarding Experience)
+
+OVERVIEW:
+Implemented a modern, high-contrast glassmorphic First Run Wizard for
+OpenPublisher V5 desktop. The wizard presents users with an inviting,
+interactive 8-step onboarding tour upon first application launch (or when
+explicitly summoned via the '--firstrun' startup flag). Featuring simplified,
+approachable language tailored to appeal equally to children and adults, the
+wizard highlights key workspace features: the Ribbon tools, 3D & retro WordArt,
+free clipart stickers, ready-made templates, colorful themes, and the single-file
+.opub document format.
+
+KEY ARCHITECTURAL HIGHLIGHTS & IMPLEMENTATION DETAILS:
+
+1. High-Contrast Glassmorphic Modal Architecture:
+   - Deep Frosted Glass Card: Integrated #firstrun-wizard-container with a centered
+     glass window (.firstrun-glass-card) featuring deep slate/teal frosted tinting
+     (linear-gradient 135deg: rgba(8, 28, 32, 0.88) to rgba(4, 18, 22, 0.94)),
+     backdrop-filter: blur(36px) saturate(180%), 26px rounded corners, crisp
+     semi-translucent border (1.5px rgba(255, 255, 255, 0.2)), and elevated
+     shadows (0 28px 75px rgba(0, 0, 0, 0.65)). This prevents washed-out visuals
+     over bright green splash backgrounds and guarantees razor-sharp text legibility.
+   - Vector Printer Emblem: Features the vector SVG OpenPublisher printer logo
+     with the embossed 'P' paper emblem, centered with a soft cyan glow and
+     drop shadow filter.
+   - Dynamic Layout Engine (Two-Column vs. Full-Width Bottom Banner):
+     * Standard Slides (1-4, 6-8): Displays a balanced side-by-side layout with
+       a rounded media preview frame on the left and typography on the right.
+     * Slide 5 (Ribbon Tools): Dynamically switches to a full-width bottom layout
+       (.firstrun-body.layout-bottom-banner via flex-direction: column-reverse).
+       The text and title are centered across the top, while the wide cropped
+       Ribbon Bar image spans horizontally across the bottom (max-width 740px,
+       height 94px) directly above the step counter pills.
+   - Interactive 8-Step Pill Stepper:
+     * Custom horizontal pill progress indicator (.firstrun-stepper-pills).
+     * Glowing cyan/teal active pill indicator (#2dd4bf) with smooth CSS transitions.
+     * Past-step completion tracking (.firstrun-pill.completed).
+     * Direct navigation: users can click any individual pill to jump to that step.
+     * Contextual step label: 'Step X of 8: [Step Name]'.
+   - Responsive Action Controls:
+     * Frosted glass 'Back' and 'Skip' secondary buttons.
+     * Glowing white primary 'Next ->' button with active tactile press feedback.
+     * Final step dynamic mutation: transitions the primary button to 'Get Started ->'.
+   - Dynamic Snug Outline Framing & Slide 5 Ribbon Spanning:
+     * Media frames (.firstrun-media-frame) utilize responsive 'fit-content' inline
+       flex sizing with zero dead padding. The glowing teal border (1.5px solid) and
+       soft shadow dynamically hug the exact aspect ratio and boundary of each image,
+       eliminating letterboxing and presenting a tailored, crisp outline around every
+       slide asset without requiring manual asset cropping.
+     * Slide 5 Bottom Banner Spanning: Expanded visual container (.firstrun-visual-col)
+       up to 730px and media frame up to 710px wide by 180px high. Allows the updated
+       2645x669 Ribbon screenshot (fr-slides/slide5.webp, ~3.95:1 ratio) to span
+       horizontally across the card with full clarity and readable tool labels.
+   - Apple-Grade Frosted Glass & Specular Depth:
+     * Dual specular bevel highlights (inset 0 1px 1px rgba(255, 255, 255, 0.35) and
+       inset 0 -1px 1px rgba(0, 0, 0, 0.35)) create an authentic glass edge.
+     * Deep satin backdrop gradient (linear-gradient 145deg: rgba(10, 32, 38, 0.92) to
+       rgba(4, 18, 22, 0.96)) with 40px blur and 200% saturation.
+   - Apple Keynote-Style Eyebrow Topic Badges:
+     * Added refined uppercase pill badges with icons above each slide heading
+       (e.g., 'WELCOME TO V5', 'CREATIVE TYPOGRAPHY', 'WORKSPACE CONTROLS').
+   - Feature Value Chips (Quick Takeaways):
+     * Added 2-3 sleek glass micro-badges per slide (e.g., '100% Free Forever',
+       '3,000+ Stickers', 'Modern Ribbon', 'All-In-One .OPUB') for fast scannability.
+   - Fluid Slide Micro-Transitions:
+     * Smooth 200ms cubic-bezier crossfade and subtle micro-glide when navigating
+       between slides.
+   - Finish Button Celebration & Keyboard Hints:
+     * Final step transitions primary button into 'Get Started -> ✨' with ambient aura.
+     * Discreet keyboard hints in card footer ('[ ← ] [ → ] Navigate • [ Esc ] Skip').
+   - Platform Indicators:
+     * Clean bottom-right platform indicator icons (Windows, macOS, Linux, Web)
+       styled with subtle opacity and hover animations matching the mockup.
+
+2. Child- & Adult-Friendly 8-Step Onboarding Tour:
+   - Slide 1: Welcome (Design Anything You Imagine)
+     * Content: Warm, friendly welcome to OpenPublisher as a free creative studio
+       for making posters, flyers, greeting cards, and school/work projects with no ads.
+     * Asset: fr-slides/slide1.webp (OpenPublisher Document Layout & Ribbon).
+   - Slide 2: WordArt (Make Words Pop with Fun WordArt)
+     * Content: Explains rotating 3D WordArt and colorful retro rainbow/wave WordArt
+       in simple, exciting terms.
+     * Asset: fr-slides/slide2.webp (Create WordArt Dialog Palette).
+   - Slide 3: Clipart (Thousands of Free Clipart & Stickers)
+     * Content: Encourages decorating creations with over 3,000 built-in illustrations,
+       stickers, animals, and borders via simple drag-and-drop.
+     * Asset: fr-slides/slide3.webp (Clipart Gallery Asset Browser).
+   - Slide 4: Templates (Start Fast with Ready-Made Templates)
+     * Content: Highlights the Dashboard for instant inspiration with hundreds of
+       templates for cards, invitations, and banners customizable in one click.
+     * Asset: fr-slides/slide4.webp (OpenPublisher Dashboard Template Launcher).
+   - Slide 5: Ribbon Tools (Easy Tools Right at Your Fingertips)
+     * Content: Introduces top toolbar tabs (Home, Insert) for changing fonts,
+       picking colors, adding shapes, and laying out booklets.
+     * Asset: fr-slides/slide5.webp (Full-width horizontal Ribbon Bar banner).
+     * Layout: Full width across bottom above step counter.
+   - Slide 6: Themes (Dress Up Your Workspace)
+     * Content: Simple explanation of Dark Mode for night work, Light Mode, and
+       over 100 playful themes to personalize the workspace.
+     * Asset: fr-slides/slide6.webp (Animated GIF cycling through live UI themes).
+     * Interactive Theme Picker: Added tactile theme buttons on the slide:
+       - Auto-Cycle (GIF): Cycles continuously through all 105 themes.
+       - Classic Teal: Switches preview to Teal and illuminates frame in teal.
+       - Dark Mode: Switches preview to Midnight Dark and illuminates frame in slate.
+       - Ocean Blue: Switches preview to OneDrive Blue and illuminates frame in sky blue.
+       - Neon Purple: Switches preview to Twitch Purple and illuminates frame in violet.
+       - Sunset Orange: Switches preview to Firefox Orange and illuminates frame in amber.
+       Clicking any swatch instantly crossfades the preview screenshot and dynamically
+       shifts the glowing neon border and ambient shadow of the media frame.
+   - Slide 7: Save & Share (Keep Everything Safe in One File)
+     * Content: Explains how .opub safely keeps all fonts, pictures, and artwork
+       neatly packed into one shareable file, plus instant PDF export.
+     * Asset: firstrun_assets/opub.webp (.OPUB Document Package Illustration).
+   - Slide 8: Get Started (You're Ready to Create!)
+     * Content: Empowering conclusion with essential shortcut (Ctrl+S to save) and
+       guidance to explore the Knowledge Base under File > Help. Clippy is
+       deliberately omitted so it remains an Easter egg for users to discover.
+     * Asset: fr-slides/slide8_option1.webp (High-resolution 3D Creative Spark artwork).
+
+3. Startup Engine Integration & Lifecycle Controls:
+   - First Launch Persistence: Checks localStorage ('openpublisher_firstrun_completed').
+     Upon completion ('Get Started' click) or skip, sets the key to 'true'.
+   - CLI Override & Simulator Flags: Supports '--firstrun', '--firtstrun' (typo tolerant),
+     '--wizard', and '--reset-firstrun' passed via argv, fullArgv, or process.argv.
+     Whenever summoned via a flag, automatically clears 'openpublisher_firstrun_completed'
+     so repeated simulator runs always present the onboarding tour cleanly.
+   - Flag File Reset ('reset_firstrun.flag'): Automatically detects and consumes
+     'reset_firstrun.flag' or 'firstrun.flag' at startup, resetting localStorage to
+     allow instantaneous wizard testing even on standard application launches.
+   - Single-Instance Redirection ('nw.App.on open'):
+     When OpenPublisher is already running (or minimized to the system tray) and the
+     user executes 'firstrunSIM.bat' or passes '--firstrun', the single-instance handler
+     instantly restores, focuses, and summons the First Run Wizard directly over the UI.
+   - Robust Simulator Script ('firstrunSIM.bat'):
+     Enhanced batch launcher to terminate any hung background OpenPublisher processes
+     first and guarantee a fresh, isolated launch with the '--firstrun' flag every time.
+   - Smooth Splash Sequencing: When triggered, cleanly fades out splash brand
+     and console elements before fading in the glass card. Upon dismissal,
+     gracefully fades out the card and dissolves the splash screen into the main UI.
+   - Offline Asset Bundling: Powered entirely by local assets (fr-slides/ and
+     firstrun_assets/) with immediate rendering checks, ensuring zero network
+     dependencies and 100% offline reliability.
+   - Global Keyboard Accessibility:
+     * ArrowRight / Enter: Advances to the next slide or finishes the wizard.
+     * ArrowLeft: Navigates back to the previous slide.
+     * Escape: Dismisses or skips the wizard immediately.
+   - Celebratory Confetti Burst:
+     * Triggered exclusively upon clicking 'Get Started -> ✨' on Slide 8.
+     * Generates 80 high-performance canvas confetti particles with realistic
+       gravity, wind resistance, and rotational spin for a 1.2-second dopamine burst.
+     * Skipped cleanly if the user opts to 'Skip'.
+   - Developer Mode & Debug HUD Integration:
+     * Added 'First Run Wizard' button directly under Quick Actions in the Debug HUD
+       (accessible via Ctrl+Shift+D).
+     * Enables instantaneous triggering and testing of the onboarding flow at any time
+================================================================================
+UPDATE LOG: OpenPublisher V5 First Run Wizard & Onboarding Subsystem
+================================================================================
+Date: September 18, 2026
+Component: wrapper.html (Startup, Splash Screen, & Onboarding Experience)
+
+OVERVIEW:
+Implemented a modern, high-contrast glassmorphic First Run Wizard for
+OpenPublisher V5 desktop. The wizard presents users with an inviting,
+interactive 8-step onboarding tour upon first application launch (or when
+explicitly summoned via the '--firstrun' startup flag). Featuring simplified,
+approachable language tailored to appeal equally to children and adults, the
+wizard highlights key workspace features: the Ribbon tools, 3D & retro WordArt,
+free clipart stickers, ready-made templates, colorful themes, and the single-file
+.opub document format.
+
+KEY ARCHITECTURAL HIGHLIGHTS & IMPLEMENTATION DETAILS:
+
+1. High-Contrast Glassmorphic Modal Architecture:
+   - Deep Frosted Glass Card: Integrated #firstrun-wizard-container with a centered
+     glass window (.firstrun-glass-card) featuring deep slate/teal frosted tinting
+     (linear-gradient 135deg: rgba(8, 28, 32, 0.88) to rgba(4, 18, 22, 0.94)),
+     backdrop-filter: blur(36px) saturate(180%), 26px rounded corners, crisp
+     semi-translucent border (1.5px rgba(255, 255, 255, 0.2)), and elevated
+     shadows (0 28px 75px rgba(0, 0, 0, 0.65)). This prevents washed-out visuals
+     over bright green splash backgrounds and guarantees razor-sharp text legibility.
+   - Vector Printer Emblem: Features the vector SVG OpenPublisher printer logo
+     with the embossed 'P' paper emblem, centered with a soft cyan glow and
+     drop shadow filter.
+   - Dynamic Layout Engine (Two-Column vs. Full-Width Bottom Banner):
+     * Standard Slides (1-4, 6-8): Displays a balanced side-by-side layout with
+       a rounded media preview frame on the left and typography on the right.
+     * Slide 5 (Ribbon Tools): Dynamically switches to a full-width bottom layout
+       (.firstrun-body.layout-bottom-banner via flex-direction: column-reverse).
+       The text and title are centered across the top, while the wide cropped
+       Ribbon Bar image spans horizontally across the bottom (max-width 740px,
+       height 94px) directly above the step counter pills.
+   - Interactive 8-Step Pill Stepper:
+     * Custom horizontal pill progress indicator (.firstrun-stepper-pills).
+     * Glowing cyan/teal active pill indicator (#2dd4bf) with smooth CSS transitions.
+     * Past-step completion tracking (.firstrun-pill.completed).
+     * Direct navigation: users can click any individual pill to jump to that step.
+     * Contextual step label: 'Step X of 8: [Step Name]'.
+   - Responsive Action Controls:
+     * Frosted glass 'Back' and 'Skip' secondary buttons.
+     * Glowing white primary 'Next ->' button with active tactile press feedback.
+     * Final step dynamic mutation: transitions the primary button to 'Get Started ->'.
+   - Dynamic Snug Outline Framing & Slide 5 Ribbon Spanning:
+     * Media frames (.firstrun-media-frame) utilize responsive 'fit-content' inline
+       flex sizing with zero dead padding. The glowing teal border (1.5px solid) and
+       soft shadow dynamically hug the exact aspect ratio and boundary of each image,
+       eliminating letterboxing and presenting a tailored, crisp outline around every
+       slide asset without requiring manual asset cropping.
+     * Slide 5 Bottom Banner Spanning: Expanded visual container (.firstrun-visual-col)
+       up to 730px and media frame up to 710px wide by 180px high. Allows the updated
+       2645x669 Ribbon screenshot (fr-slides/slide5.webp, ~3.95:1 ratio) to span
+       horizontally across the card with full clarity and readable tool labels.
+   - Apple-Grade Frosted Glass & Specular Depth:
+     * Dual specular bevel highlights (inset 0 1px 1px rgba(255, 255, 255, 0.35) and
+       inset 0 -1px 1px rgba(0, 0, 0, 0.35)) create an authentic glass edge.
+     * Deep satin backdrop gradient (linear-gradient 145deg: rgba(10, 32, 38, 0.92) to
+       rgba(4, 18, 22, 0.96)) with 40px blur and 200% saturation.
+   - Apple Keynote-Style Eyebrow Topic Badges:
+     * Added refined uppercase pill badges with icons above each slide heading
+       (e.g., 'WELCOME TO V5', 'CREATIVE TYPOGRAPHY', 'WORKSPACE CONTROLS').
+   - Feature Value Chips (Quick Takeaways):
+     * Added 2-3 sleek glass micro-badges per slide (e.g., '100% Free Forever',
+       '3,000+ Stickers', 'Modern Ribbon', 'All-In-One .OPUB') for fast scannability.
+   - Fluid Slide Micro-Transitions:
+     * Smooth 200ms cubic-bezier crossfade and subtle micro-glide when navigating
+       between slides.
+   - Finish Button Celebration & Keyboard Hints:
+     * Final step transitions primary button into 'Get Started -> ✨' with ambient aura.
+     * Discreet keyboard hints in card footer ('[ ← ] [ → ] Navigate • [ Esc ] Skip').
+   - Platform Indicators:
+     * Clean bottom-right platform indicator icons (Windows, macOS, Linux, Web)
+       styled with subtle opacity and hover animations matching the mockup.
+
+2. Child- & Adult-Friendly 8-Step Onboarding Tour:
+   - Slide 1: Welcome (Design Anything You Imagine)
+     * Content: Warm, friendly welcome to OpenPublisher as a free creative studio
+       for making posters, flyers, greeting cards, and school/work projects with no ads.
+     * Asset: fr-slides/slide1.webp (OpenPublisher Document Layout & Ribbon).
+   - Slide 2: WordArt (Make Words Pop with Fun WordArt)
+     * Content: Explains rotating 3D WordArt and colorful retro rainbow/wave WordArt
+       in simple, exciting terms.
+     * Asset: fr-slides/slide2.webp (Create WordArt Dialog Palette).
+   - Slide 3: Clipart (Thousands of Free Clipart & Stickers)
+     * Content: Encourages decorating creations with over 3,000 built-in illustrations,
+       stickers, animals, and borders via simple drag-and-drop.
+     * Asset: fr-slides/slide3.webp (Clipart Gallery Asset Browser).
+   - Slide 4: Templates (Start Fast with Ready-Made Templates)
+     * Content: Highlights the Dashboard for instant inspiration with hundreds of
+       templates for cards, invitations, and banners customizable in one click.
+     * Asset: fr-slides/slide4.webp (OpenPublisher Dashboard Template Launcher).
+   - Slide 5: Ribbon Tools (Easy Tools Right at Your Fingertips)
+     * Content: Introduces top toolbar tabs (Home, Insert) for changing fonts,
+       picking colors, adding shapes, and laying out booklets.
+     * Asset: fr-slides/slide5.webp (Full-width horizontal Ribbon Bar banner).
+     * Layout: Full width across bottom above step counter.
+   - Slide 6: Themes (Dress Up Your Workspace)
+     * Content: Simple explanation of Dark Mode for night work, Light Mode, and
+       over 100 playful themes to personalize the workspace.
+     * Asset: fr-slides/slide6.webp (Animated GIF cycling through live UI themes).
+     * Interactive Theme Picker: Added tactile theme buttons on the slide:
+       - Auto-Cycle (GIF): Cycles continuously through all 105 themes.
+       - Classic Teal: Switches preview to Teal and illuminates frame in teal.
+       - Dark Mode: Switches preview to Midnight Dark and illuminates frame in slate.
+       - Ocean Blue: Switches preview to OneDrive Blue and illuminates frame in sky blue.
+       - Neon Purple: Switches preview to Twitch Purple and illuminates frame in violet.
+       - Sunset Orange: Switches preview to Firefox Orange and illuminates frame in amber.
+       Clicking any swatch instantly crossfades the preview screenshot and dynamically
+       shifts the glowing neon border and ambient shadow of the media frame.
+   - Slide 7: Save & Share (Keep Everything Safe in One File)
+     * Content: Explains how .opub safely keeps all fonts, pictures, and artwork
+       neatly packed into one shareable file, plus instant PDF export.
+     * Asset: firstrun_assets/opub.webp (.OPUB Document Package Illustration).
+   - Slide 8: Get Started (You're Ready to Create!)
+     * Content: Empowering conclusion with essential shortcut (Ctrl+S to save) and
+       guidance to explore the Knowledge Base under File > Help. Clippy is
+       deliberately omitted so it remains an Easter egg for users to discover.
+     * Asset: fr-slides/slide8_option1.webp (High-resolution 3D Creative Spark artwork).
+
+3. Startup Engine Integration & Lifecycle Controls:
+   - First Launch Persistence: Checks localStorage ('openpublisher_firstrun_completed').
+     Upon completion ('Get Started' click) or skip, sets the key to 'true'.
+   - CLI Override & Simulator Flags: Supports '--firstrun', '--firtstrun' (typo tolerant),
+     '--wizard', and '--reset-firstrun' passed via argv, fullArgv, or process.argv.
+     Whenever summoned via a flag, automatically clears 'openpublisher_firstrun_completed'
+     so repeated simulator runs always present the onboarding tour cleanly.
+   - Flag File Reset ('reset_firstrun.flag'): Automatically detects and consumes
+     'reset_firstrun.flag' or 'firstrun.flag' at startup, resetting localStorage to
+     allow instantaneous wizard testing even on standard application launches.
+   - Single-Instance Redirection ('nw.App.on open'):
+     When OpenPublisher is already running (or minimized to the system tray) and the
+     user executes 'firstrunSIM.bat' or passes '--firstrun', the single-instance handler
+     instantly restores, focuses, and summons the First Run Wizard directly over the UI.
+   - Robust Simulator Script ('firstrunSIM.bat'):
+     Enhanced batch launcher to terminate any hung background OpenPublisher processes
+     first and guarantee a fresh, isolated launch with the '--firstrun' flag every time.
+   - Smooth Splash Sequencing: When triggered, cleanly fades out splash brand
+     and console elements before fading in the glass card. Upon dismissal,
+     gracefully fades out the card and dissolves the splash screen into the main UI.
+   - Offline Asset Bundling: Powered entirely by local assets (fr-slides/ and
+     firstrun_assets/) with immediate rendering checks, ensuring zero network
+     dependencies and 100% offline reliability.
+   - Global Keyboard Accessibility:
+     * ArrowRight / Enter: Advances to the next slide or finishes the wizard.
+     * ArrowLeft: Navigates back to the previous slide.
+     * Escape: Dismisses or skips the wizard immediately.
+   - Celebratory Confetti Burst:
+     * Triggered exclusively upon clicking 'Get Started -> ✨' on Slide 8.
+     * Generates 80 high-performance canvas confetti particles with realistic
+       gravity, wind resistance, and rotational spin for a 1.2-second dopamine burst.
+     * Skipped cleanly if the user opts to 'Skip'.
+   - Developer Mode & Debug HUD Integration:
+     * Added 'First Run Wizard' button directly under Quick Actions in the Debug HUD
+       (accessible via Ctrl+Shift+D).
+     * Enables instantaneous triggering and testing of the onboarding flow at any time
+       without requiring an application reboot with '--firstrun'.
+   - Slide 8 Showcase Artwork:
+     * Set active artwork to Option 1 (fr-slides/slide8_option1.webp):
+       A vibrant 3D floating canvas with 'Creative Spark', brochure pages,
+       stickers, magic pencil, and confetti ribbons. Option 2 (sleek dark studio)
+       remains available in fr-slides/slide8_option2.webp as an alternative.
+   - Slide 6 Dark Mode Integration & Theme Organization:
+     * Segmented Mode Navigation: Categorized Slide 6 into three dedicated modes:
+       1. Dark Mode (Moon icon, Cyan tint)
+       2. Light Themes (Sun icon, Amber tint)
+       3. Auto-Cycle GIF (Sync icon, Teal tint)
+     * Genuine Dark Mode Displays: Added 6 full workspace Dark Mode options
+       (True Dark, Teal, Blue, Purple, Green, Yellow) utilizing the new
+       high-resolution screenshots (true-dark.png, teal_dark.png, blue_dark.png,
+       purple_dark.png, green_dark.png, yellow_dark.png).
+     * Renamed "Dark Theme": Clarified the dark theme on light mode interface by
+       explicitly labeling it "Dark Theme" (theme_dark.webp) under Light Themes.
+     * Dynamic Ambient Glow & Border: Clicking any theme button dynamically updates
+       the media frame border color and box shadow to emit a matching ambient glow.
+      * Auto-Cycle Default Selection: Configured the 105-frame animated GIF showcase
+        (fr-slides/slide6.webp) as the active default mode (defaultCategory: 'autocycle')
+        upon landing on Slide 6. Features the cyan/teal active pill highlight and
+        play badge indicator ('Animated preview of 100+ interface themes'). Users can
+        seamlessly switch between Auto-Cycle, Dark Mode, and Light Themes at any time.
+    - Frameless Floating Media for Modal Dialogs & Assets:
+      * Problem: Cropped modal dialogs (Slide 2: WordArt, Slide 3: Clipart Gallery)
+        and document icons (Slide 7: .OPUB file) were constrained inside a rigid
+        14px rounded rectangle frame with dark teal background. Because the dialogs
+        have large rounded corners (~80px radius) and the .OPUB file is a tilted sheet,
+        the frame produced dark corner gaps, double borders, and mismatched outlines.
+      * Solution: Added a dedicated 'frameless' mode to .firstrun-media-frame:
+        - Removes the rigid border and dark background (background: transparent,
+          border-color: transparent, box-shadow: none, overflow: visible).
+        - Equips the image with Apple-grade dual drop-shadows:
+          filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 18px rgba(45, 212, 191, 0.25)).
+      * Result: WordArt and Clipart dialogs now float gracefully in 3D space above the
+        glass card with their natural rounded corners, zero dark corner artifacts, and
+        zero double-border conflicts. The .OPUB file icon floats cleanly as an authentic
+        document graphic. Full-bleed window slides (1, 4, 5, 6, 8) retain their sleek
+        14px glass frames.
+      * Workspace Alternatives: Created in-context OpenPublisher canvas composites
+        (fr-slides/slide2_workspace.webp and fr-slides/slide3_workspace.webp) as
+        ready-to-use alternative assets if full-window screenshots are preferred.
+
+    - Slide 5 Ribbon Tools Reordering & Snug Border Fitting:
+      * Layout Reordering: Adjusted Slide 5 (layout-bottom-banner) to place the Ribbon
+        preview image directly above the text description, chips, and stepper controls:
+        1. Eyebrow badge ("WORKSPACE CONTROLS")
+        2. Ribbon preview image (slide5.webp)
+        3. Heading ("Easy Tools Right at Your Fingertips")
+        4. Description text
+        5. Feature tags / chips ("Modern Ribbon", "Contextual Tabs", "Quick Access")
+      * Snug Frame Fitting (0px Letterbox Gap):
+        - Updated .firstrun-body.layout-bottom-banner .firstrun-media-frame to
+          width: fit-content and height: fit-content (max-width: 710px).
+        - Updated .firstrun-body.layout-bottom-banner .firstrun-media-img to
+          width: auto, max-width: 710px, max-height: 160px, height: auto.
+        - Matched corner radius to 10px on the frame and 9px on the image to perfectly
+          track the native curved corners of the Ribbon window capture.
+        - Result: Eliminated the 14px lateral dead space and dark side pillars. The glowing
+          teal frame border now hugs the Ribbon image snugly on all four sides with 0px gap.
+
+    - Asset Directory Reorganization & Relinking Consolidation:
+      * Unified Directory Hierarchy: Consolidated all scattered assets from 'fr-slides/'
+        and 'firstrun_assets/' into a single, clean, standardized directory structure
+        under 'firstrun_assets/':
+        - firstrun_assets/slides/: All 8 primary tour slides (slide1_welcome.webp
+          through slide8_create.webp).
+        - firstrun_assets/themes/dark/: 6 high-resolution Dark Mode workspace previews
+          (true-dark.png, teal_dark.png, blue_dark.png, purple_dark.png,
+          green_dark.png, yellow_dark.png).
+        - firstrun_assets/themes/light/: 5 Light Mode theme previews (theme_teal.webp,
+          theme_dark.webp, theme_blue.webp, theme_purple.webp, theme_orange.webp).
+        - firstrun_assets/ui/: Custom UI vector elements (right-arrow.svg).
+        - firstrun_assets/archive/: Safely cataloged redundant duplicates, legacy
+          mockups, and alternative composite views (alternatives/, duplicates/,
+          legacy_prototypes/).
+      * Directory Cleanup: Completely eliminated the legacy 'fr-slides/' directory.
+      * Codebase Relinking: Updated all asset references across wrapper.html:
+        - Line 2168: Default 'Next' button markup points to firstrun_assets/ui/right-arrow.svg.
+        - Lines 7989-8103: All FIRSTRUN_SLIDES slide images and theme button paths point
+          to their new firstrun_assets/ destinations.
+        - Lines 8472-8475: Dynamic step advance button mutations point to
+          firstrun_assets/ui/right-arrow.svg.
+      * Headless Verification: Verified all 8 slides, frameless modes, and 13 dynamic
+        theme switching variants via Playwright automated testing with 100% asset
+        load success and zero console errors.

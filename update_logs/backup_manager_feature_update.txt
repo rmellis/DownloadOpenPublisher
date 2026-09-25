@@ -1,0 +1,15 @@
+# Interactive Backup Manager & System Tray Recovery Integration
+
+## Overview
+Added an interactive, draggable Backup Manager modal dialog to OpenPublisher, accessible from the titlebar controls, the Developer HUD, and the Windows system tray icon. Users can view, search, inspect, and open archived .bak files as independent publications ready to save as desired.
+
+## Changes Made
+1. **Draggable Modal Dialog (wrapper.html)**: Implemented #custom-backup-mgr-overlay with a modern, draggable window interface styled after OpenPublisher native modals, featuring a real-time search filter, refresh controls, direct Explorer folder access, and chronological sorting (newest first).
+2. **Metadata Inspection & Listing**: Each backup entry displays its publication name, raw filename, last modified date and time, file size, and parsed page count with selected-item preview highlights.
+3. **Decoupled Recovery Loader**: When opening a backup, the publication is decoded and loaded into the canvas editor with the pour animation, labeled as a (Backup), and activeFilePath is decoupled (set to null) so that pressing Save triggers Save As, preventing accidental overwriting of existing archives.
+4. **Unsaved Changes Guard**: Added safety confirmation checks prior to loading a backup if the user currently has unsaved modifications in their working document.
+5. **Multi-Entry Access**:
+   - Titlebar Button: Positioned a dedicated #backup-mgr-btn with a restore/clock icon on the left side of the titlebar (#controls-wrapper-left at left: 272px), nicely spaced after the application branding and quick-access tools (Home, Save, Undo, Redo), balancing the titlebar without overlapping any buttons. Features responsive auto-hiding when the visible window frame width is 910px or below (excluding the 40px outer shadow margins) to prevent overlapping the centered document title.
+   - System Tray: Added a "Backup Manager..." item to the right-click system tray context menu that restores, focuses the window, and presents the dialog.
+   - Developer HUD: Added a "Backup Manager" action button to the Quick Actions toolbar.
+6. **Direct Backup Management**: Included a Delete action button to permanently remove obsolete .bak files from the system recovery directory with user confirmation.

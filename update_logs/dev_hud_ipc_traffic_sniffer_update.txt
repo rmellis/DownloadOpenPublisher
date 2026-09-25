@@ -1,0 +1,47 @@
+================================================================================
+UPDATE LOG: Developer HUD IPC Traffic Sniffer & Uniform Badge Sizing
+================================================================================
+Date: September 13, 2026
+Component: wrapper.html (Developer HUD & IPC Subsystem)
+
+OVERVIEW:
+Added a bidirectional IPC traffic logging sniffer to Developer Mode with real-time
+visual streaming directly into the in-HUD terminal and DevTools console.
+Fixed flex layout stretching on multi-line entries to ensure all [IN] and [OUT]
+badges maintain a uniform, compact 14px pill height matching single-line items.
+
+KEY ADDITIONS & REFINEMENTS:
+1. Uniform Badge Dimensions:
+   - Added `align-items: flex-start;` to `.dev-log-entry` in wrapper.html CSS.
+   - Defined `.dev-log-badge` with fixed 14px height, `min-width: 24px`, and
+     `inline-flex` centering to prevent multi-line text from vertically stretching
+     the badge.
+   - All badges now render in the ideal compact pill size, aligned with the top
+     line of text and timestamp.
+
+2. Developer HUD Preference Toggle & Instant Feedback:
+   - Added switch item "Log IPC Traffic" under Preferences in the Developer HUD.
+   - Tied to input element #dev-toggle-log-ipc with native slider UI.
+   - Persists state across sessions and reloads via localStorage key
+     'op_log_ipc_traffic'.
+   - When toggled ON, immediately outputs: [SYSTEM] Traffic sniffer enabled.
+
+3. Outbound IPC Interception (Wrapper -> IPC):
+   - Proxied webview.executeScript dynamically at initialization and on page loads.
+   - Logs with sky blue badge in DevTools and [OUT] badge in HUD terminal.
+   - Mirrors logs to both App DevTools and View DevTools consoles.
+
+4. Inbound IPC Interception (IPC -> Wrapper):
+   - Enhanced webview's 'consolemessage' listener.
+   - Logs with teal badge in DevTools and [IN] badge in HUD terminal.
+   - Mirrors logs to both App DevTools and View DevTools consoles.
+
+5. Webapp Bridge Helper (window.desktopIPC):
+   - Injected window.desktopIPC into the webapp guest context:
+     window.desktopIPC.send(type, payload)
+
+VERIFICATION:
+- Confirmed zero syntax errors across all JavaScript blocks.
+- Verified in Chromium that all badge elements measure exactly 14px in height
+  on both single-line and multi-line items.
+================================================================================

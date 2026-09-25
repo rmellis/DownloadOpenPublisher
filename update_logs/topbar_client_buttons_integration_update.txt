@@ -1,0 +1,57 @@
+================================================================================
+UPDATE LOG: Topbar Client Controls & Solid Icon Integration
+================================================================================
+Date: September 13, 2026
+Component: wrapper.html (Titlebar UI & Responsive Layout Subsystem)
+
+OVERVIEW:
+Integrated Export & Print Queue Monitor and Document Presentation Preview directly
+into the primary OpenPublisher titlebar adjacent to Previous Versions. Refactored
+button styling to seamlessly match the webapp icon aesthetic (unboxed, transparent,
+borderless) and upgraded all wrapper icons to official Font Awesome 6 Solid shapes
+with sub-pixel vertical alignment and responsive collapse protection.
+
+KEY FEATURES & ARCHITECTURAL HIGHLIGHTS:
+1. Unboxed Toolbar Button Styling:
+   - Removed bulky container boxes, backgrounds, and borders from #backup-mgr-btn,
+     #prev-versions-btn, #export-queue-btn, and #doc-preview-btn.
+   - Applied transparent backgrounds with subtle hover feedback
+     (background: rgba(255, 255, 255, 0.16); opacity: 1).
+   - Added active click scale transform (scale(0.9)) for tactile feedback.
+
+2. Solid Font Awesome 6 Icon Set:
+   - Replaced thin wireframe SVGs with bold Font Awesome 6 Solid (weight 900) SVG paths
+     to match the visual density of the webapp Home, Save, Undo, and Redo buttons:
+     * Backup Manager: clock-rotate-left (solid clock matching undo arrow stroke)
+     * Previous Versions: clone (solid front card with offset backing)
+     * Export & Print Queue: print (solid printer silhouette)
+     * Presentation Preview: solid rounded screen with centered play cutout
+   - Sized all SVG icons to 13px x 13px matching the 13px font size of webapp controls.
+
+3. Sub-Pixel Vertical Baseline Alignment:
+   - Resolved the 1.5px vertical discrepancy where wrapper icons were sitting higher
+     than the webapp icons.
+   - Increased control container (#controls-wrapper-left) height from 32px to 35px,
+     matching the webapp titlebar height.
+   - Centered the 22px buttons at exactly 17.5px (18.50px accounting for container border),
+     locking all 8 icons across the entire titlebar to the exact same horizontal baseline.
+
+4. Spacing Rhythm & Drag Zone Buffer:
+   - Configured gap: 6px and left: 272px, providing an identical ~28px center-to-center
+     distance across every button (Redo -> Backup -> Versions -> Export -> Preview).
+   - Shifted #drag-zone-left2 to left: 382px to maintain a 4px clearance buffer.
+
+5. Responsive Collapse Protection:
+   - Implemented progressive breakpoint collapse in updateTopbarButtonsVisibility():
+     * <= 1100px: collapses Presentation Preview (maintaining >25px clearance before #doc-title)
+     * <= 1040px: collapses Export & Print Queue Monitor
+     * <= 980px: collapses Previous Versions
+     * <= 910px: collapses Backup Manager
+   - Prevents any collision with the dynamically centered #doc-title pill.
+
+VERIFICATION:
+- Playwright computed style inspection confirmed transparent backgrounds, 0px border,
+  and exact 18.50px vertical center alignment across all 4 wrapper buttons.
+- Multi-viewport tests verified sequential collapse across test widths (1280px down to 900px).
+- Visual rendering confirmed unified weight and baseline harmony across all 8 icons.
+================================================================================

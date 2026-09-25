@@ -1,0 +1,16 @@
+# Update: Chromium Idle Auto-Save (chrome.idle)
+
+## Summary
+Integrated Chromium's chrome.idle API into wrapper.html to automatically save the user's publication when their system becomes inactive or is locked.
+
+## Changes & Implementation Details
+- **Idle Detection Initialization**:
+  - Set chrome.idle.setDetectionInterval(600) to configure the system idle threshold to 10 minutes (600 seconds).
+- **State Change Listener**:
+  - Added an event listener to chrome.idle.onStateChanged to monitor system activity.
+  - When the system state transitions to 'idle' (user is away) or 'locked' (screen is locked), the wrapper automatically executes a script inside the webview.
+- **Auto-Save Execution & UX**:
+  - Injects if(window.saveDocument) window.saveDocument(); into the webview environment when the idle condition is met.
+  - This seamlessly hooks into the existing OP_SAVE_DATA IPC pipeline.
+  - **Saved Documents**: If the document already has a save location (ctiveFilePath), it is quietly saved in the background with the standard animations and taskbar progress.
+  - **Unsaved Documents**: If the user has never saved the document, the app programmatically triggers a native "Save As" file dialog. This dialog will stay on the screen indefinitely while the user is away. When they return, they are greeted by the prompt, ensuring they immediately select a save location without losing any work.

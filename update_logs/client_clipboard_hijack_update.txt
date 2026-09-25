@@ -1,0 +1,100 @@
+================================================================================
+UPDATE LOG: OpenPublisher V5 Unified Client-Side Clipboard Hijack & Synchronization
+================================================================================
+Date: September 24, 2026
+Component: wrapper.html (Clipboard Subsystem, Ribbon Button Hooks, & Menu Dispatch)
+
+OVERVIEW:
+Resolved critical clipboard synchronization issues across internal and external
+payloads:
+1. Double-pasting bug: Copying an element in OpenPublisher followed by copying an
+   external image or text caused both the old element and the new image to be
+   pasted onto the canvas simultaneously.
+2. Ribbon paste lock: Clicking the Ribbon "Paste" button only pasted what was last
+   copied inside OpenPublisher, completely ignoring new content on the OS system
+   clipboard.
+3. Internal element copy failure: In sandboxed webviews, navigator.clipboard.writeText
+   failed to populate the OS system clipboard with the internal marker token
+   ("openpublisher_internal_multi"), preventing internal elements (shapes, cliparts,
+   text boxes) from being pasted after a copy.
+4. Text box token leakage: Pasting while focused inside a text box or table cell
+   previously allowed the internal marker string ("openpublisher_internal_multi")
+   to be typed into the text field instead of routing images or elements to the
+   canvas.
+
+KEY ARCHITECTURAL IMPROVEMENTS:
+1. Bidirectional Client Clipboard Synchronization (OP_ELEMENT_COPIED):
+   - Hooked window.copyEl and window.cutEl across all channels (Ribbon buttons,
+     keyboard shortcuts Ctrl+C / Ctrl+X, context menu, and menubar).
+   - Whenever an internal canvas element is copied or cut, an OP_ELEMENT_COPIED
+     IPC message is sent directly to the wrapper process.
+   - The wrapper immediately invokes:
+     * nw.Clipboard.get().clear() (wiping any previous external images)
+     * nw.Clipboard.get().set('openpublisher_internal_multi', 'text')
+   - Guarantees 100% reliable detection of internal canvas element copies.
+
+2. Priority-Ordered Client Paste Dispatcher (handleClientPaste):
+   - Prioritizes internal element token detection on canvas:
+     * If textData === 'openpublisher_internal_multi':
+       Immediately invokes window.pasteEl(inPlace) with the standard cascade offset.
+     * If external image (png / jpeg):
+       Clears stale internal buffers and inserts the image via window.insertSmartImage().
+     * If external text:
+       Clears stale internal buffers and triggers clean text paste.
+
+3. Strict Text Box & Input Protection:
+   - When cursor is inside an active text box or table cell (isTextEditing):
+     * Image on OS clipboard:
+       Automatically inserts the image onto the canvas (outside the text box)
+       and prevents raw tokens or un-editable image tags from entering the text box.
+     * Internal Element Token ('openpublisher_internal_multi'):
+       Pastes the canvas element cleanly onto the canvas and strictly suppresses
+       typing the internal token into the text box.
+     * External Text:
+       Pastes clean text directly at the cursor position.
+   - DOM Capture-Phase Guard:
+     * Added a top-level listener on document 'paste' to intercept and block
+       'openpublisher_internal_multi' from ever being inserted into any text element.
+
+TESTING & VERIFICATION:
+- Verified with automated Playwright and script evaluation test suites:
+  * Zero JavaScript syntax or parse errors in wrapper.html.
+  * handleClientPaste registered on window scope.
+  * OP_ELEMENT_COPIED and OP_PERFORM_CLIENT_PASTE registered in IPC router.
+  * Text box guard verified.
+================================================================================
+
+
+================================================================================
+UPDATE: Physical Ribbon Bar Copy, Cut, and Paste Buttons Parity Fix
+================================================================================
+Date: September 24, 2026
+Component: wrapper.html (Capture-Phase Ribbon Event Interceptor)
+
+ROOT CAUSE:
+1. Event Cancellation Conflict:
+   The previous wrapper interceptor listened across ['mousedown', 'mouseup', 'click'].
+   Calling preventDefault() and stopPropagation() on mousedown prevented Chromium from
+   ever generating or dispatching the subsequent click event, muting the Ribbon Paste button.
+2. Missing Copy/Cut Button Coverage:
+   The interceptor previously only targeted Paste. When clicking the physical Copy or Cut
+   buttons on the ribbon, the web application's default copyEl() ran without notifying the
+   wrapper via OP_ELEMENT_COPIED, leaving the OS system clipboard out of sync.
+
+SOLUTION & IMPLEMENTATION:
+1. Unified Capture-Phase Click Interceptor:
+   - Configured document.addEventListener('click', handler, true) to intercept physical
+     Ribbon and Context Menu clicks during the capture phase, prior to inline onclicks.
+   - Preserves mousedown and mouseup naturally so clicks are cleanly generated.
+2. Functional Parity with Ctrl+C, Ctrl+X, and Ctrl+V:
+   - Ribbon Copy (mirrors Ctrl+C):
+     * If text editing with selection: copies text via document.execCommand('copy').
+     * If canvas elements selected: calls window.copyEl(), ensures state.copiedEl and
+       state.copiedElements are populated, and sends OP_ELEMENT_COPIED to NW.js.
+   - Ribbon Cut (mirrors Ctrl+X):
+     * If text editing with selection: cuts text via document.execCommand('cut').
+     * If canvas elements selected: calls window.cutEl(), updates state, and sends OP_ELEMENT_COPIED.
+   - Ribbon Paste (mirrors Ctrl+V):
+     * If text editing: sends OP_GET_CLEAN_CLIPBOARD to invoke native webview.paste().
+     * If on canvas: sends OP_PERFORM_CLIENT_PASTE to execute handleClientPaste(inPlace).
+================================================================================

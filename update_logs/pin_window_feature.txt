@@ -1,0 +1,29 @@
+# Always-on-Top Window Pinning Feature
+
+## Overview
+Added a native 'Pin' icon button to the top-right `#controls-wrapper` in `wrapper.html`, positioned adjacent to the Recent Files button and window controls. This control allows users to toggle the window's float state at any time, keeping OpenPublisher fixed above all other OS windows for reference workflows or multitasking.
+
+## Key Features & Implementation
+
+1. **Native Pin Control in Titlebar Controls**
+   - Positioned cleanly within `#controls-wrapper` immediately to the right of Recent Files and adjacent to the window controls.
+   - Explicitly configured with `-webkit-app-region: no-drag;` to ensure clicks and hover states are not intercepted by the window drag regions.
+   - Styled with the classic vector pushpin icon (`width: 13px; height: 13px`) centered in a `22px` height frosted glass button with smooth transitions.
+
+2. **OS Window Float Toggling**
+   - Directly triggers `nw.Window.get().setAlwaysOnTop(true/false)` to toggle the Win32 `WS_EX_TOPMOST` window style (and equivalent macOS/Linux compositing flags).
+   - Floats the application above other desktop windows without disrupting window focus or input states.
+
+3. **Engaged Visual State Feedback**
+   - **Inactive State**: Sits upright (`transform: none`) in clean frosted white (`fill: rgba(255, 255, 255, 0.9)`), blending naturally into the frosted titlebar controls.
+   - **Active State (Pinned)**:
+     - The pushpin rotates `-45deg` into its engaged pinned orientation.
+     - The icon illuminates in bright green (`#4ade80`) with an enhanced drop-shadow glow (`filter: drop-shadow(0 0 2px rgba(74, 222, 128, 0.7))`).
+     - The button switches to an inset dark glass background (`background: rgba(0, 0, 0, 0.22)`) with a subtle translucent green border (`rgba(74, 222, 128, 0.5)`), giving the glowing rotated pin strong contrast against the window header.
+     - Tooltip updates dynamically between *"Pin window on top (Always on Top)"* and *"Unpin window (Currently floating on top)"*.
+
+4. **Responsive Titlebar Clearance & Auto-Hide**
+   - **Staged Collapsing**:
+     - At widths below `1260px`: The wide Recent Files dropdown button automatically hides to eliminate any potential overlap with the expanding document title pill (`Publication1`).
+     - At widths below `980px`: The Pin button automatically hides (`display: none`), preserving full clearance for the document naming bar on very narrow or shrunk windows.
+   - **Instant Recovery**: When the window is expanded or maximized, both buttons cleanly restore without needing an app reload.

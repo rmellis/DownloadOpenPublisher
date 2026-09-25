@@ -1,0 +1,11 @@
+# Update: Subpixel Font Rendering (Safari Style)
+
+## Summary
+Improved the typography and anti-aliasing rendering engine to mimic Safari's crisp rendering at all zoom levels, ensuring highly legible text and sharper downscaled elements.
+
+## Changes
+- **Chromium Flags (package.json)**: Added --enable-gpu-rasterization, --enable-zero-copy, --force-color-profile=srgb, and --enable-accelerated-2d-canvas to securely hardware-accelerate drawing and maintain color consistency across the GPU without risking legacy hardware compatibility.
+- **CSS Injection (wrapper.html)**: Injected global CSS into the <webview> applying:
+  - -webkit-font-smoothing: subpixel-antialiased !important; and text-rendering: optimizeLegibility !important; for maximum font clarity.
+  - shape-rendering: geometricPrecision !important; to ensure SVG vectors calculate exact sub-pixel geometry rather than using blurry fast-paths.
+  - image-rendering: -webkit-optimize-contrast !important; and image-rendering: crisp-edges !important; on canvas and media elements to prevent severe blurring during bilinear downscaling.

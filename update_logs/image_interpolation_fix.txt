@@ -1,0 +1,9 @@
+# Update: Restored Smooth Image Interpolation
+
+## Summary
+Fixed an issue where downscaled/upscaled PNG icons (e.g., Clipart, WordArt) in the web app's ribbon appeared heavily pixelated and jagged.
+
+## Changes
+- **CSS Injection Adjustment (wrapper.html)**:
+  - Removed the `image-rendering: -webkit-optimize-contrast !important` and `crisp-edges` flags that were previously injected alongside the subpixel font rendering update. 
+  - Chromium now defaults back to `auto` (bilinear/bicubic interpolation), which restores smooth anti-aliased scaling for images and icons, while leaving the high-quality subpixel text rendering completely intact.

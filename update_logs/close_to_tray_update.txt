@@ -1,0 +1,26 @@
+# Update: Developer HUD "Close to System Tray" & Single Instance Restoration
+
+## Summary
+Added a user-configurable "Close to System Tray" toggle switch directly inside the Developer HUD. When enabled, clicking the window close ('X') button seamlessly hides the window to the system tray rather than closing/quitting the application. Additionally, updated the Single Instance Lock listener (nw.App.on('open', ...)) so that attempting to launch a second instance while the app is hidden in the tray immediately unhides, restores, and focuses the existing window.
+
+## Changes
+
+### 1. Developer HUD Toggle Switch (wrapper.html)
+- HUD Interface & Switch Styling:
+  - Added a dedicated "Preferences" section to the Developer HUD with a toggle switch labeled "Close to System Tray".
+  - Styled with custom .dev-switch and .dev-slider controls matching the dark debug HUD theme with teal active states.
+- State Persistence:
+  - Bound the toggle switch to localStorage.getItem('op_close_to_tray') so user preferences survive application reloads and restarts.
+
+### 2. Custom Close Button Interception (wrapper.html)
+- Updated the window close button (#win-close and #mac-close) click handlers:
+  - If "Close to System Tray" is enabled (op_close_to_tray === 'true'), clicking the 'X' button calls win.hide(), sets isAppVisible = false, and updates the tray menu context options.
+  - If disabled, the close button continues to invoke the standard dirty-state / unsaved changes exit dialog check (triggerCloseCheck()).
+
+### 3. Single Instance Lock Re-Focus (wrapper.html)
+- Updated the nw.App.on('open', ...) listener:
+  - If a user tries to launch OpenPublisher again (via desktop shortcut, start menu, or file association) while the application is hidden in the tray, it now explicitly executes:
+    - win.show()
+    - win.restore()
+    - win.focus()
+  - Re-synchronizes isAppVisible = true and updates the system tray context menu to ensure the window reappears instantly and gains input focus.

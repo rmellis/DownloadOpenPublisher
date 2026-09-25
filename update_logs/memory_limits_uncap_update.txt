@@ -1,0 +1,14 @@
+# Update: Application Memory Limits Uncapped
+
+## Summary
+Uncapped the memory limits for the underlying Chromium engine to allow the application to process massive, heavy publications without lagging or crashing due to out-of-memory errors.
+
+## Changes
+- **Chromium Args (`package.json`)**: 
+  - Added `--js-flags="--max-old-space-size=8192"` to increase the V8 JavaScript engine's memory limit to 8GB.
+  - Added `--force-gpu-mem-available-mb=4096` to allocate up to 4GB of VRAM to the GPU renderer, ensuring massive headroom for canvas drawing and scaling operations.
+
+## Low-End Hardware Compatibility
+These new flags establish a maximum usage ceiling, not a minimum requirement. Chromium does not pre-allocate or reserve this memory on launch. 
+- Users with lower-end hardware (e.g., 4GB of RAM) will still be able to launch and use the app normally at baseline memory levels. 
+- If a low-end system attempts to process a massive publication that exceeds its physical RAM, the operating system will gracefully fall back to using Virtual Memory (the hard drive pagefile) rather than instantly crashing.

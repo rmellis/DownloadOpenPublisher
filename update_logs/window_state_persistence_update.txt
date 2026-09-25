@@ -1,0 +1,23 @@
+# Update: Window State & Position Persistence
+
+## Summary
+Added comprehensive window size, position, and maximize state persistence across application sessions in wrapper.html, with multi-monitor disconnection safeguards and custom exit modal compatibility.
+
+## Changes & Implementation Details
+- **State Capture (saveWindowBounds)**:
+  - Encapsulated coordinate and dimension tracking (x, y, width, height) into a dedicated helper function.
+  - Added detection for maximized state (document.body.classList.contains('maximized')).
+  - When closing while maximized, the system preserves the previous unmaximized dimensions in storage so unmaximizing later restores the user's customized layout.
+  - Saves the structured state JSON to localStorage under op_window_bounds.
+
+- **Exit Interception**:
+  - Hooked saveWindowBounds() directly into the custom exit confirmation modal (#custom-exit-confirm), preventing NW.js's win.close(true) from bypassing shutdown persistence.
+  - Maintained fallback invocation within the native win.on('close') event listener (e.g., Alt+F4 or task manager termination).
+
+- **Restoration & Multi-Monitor Safeguard on Boot**:
+  - Reads op_window_bounds on startup immediately after window initialization.
+  - Uses the 
+w.Screen API to query all active physical displays.
+  - Verifies that saved window coordinates are within the viewable area of at least one connected monitor (with a 50px boundary buffer).
+  - Falls back gracefully to the primary display (screens[0]) at (50, 50) if the coordinates belong to a detached secondary monitor, preventing off-screen "ghost" windows.
+  - Automatically re-applies win.maximize() if isMaximized was true when exiting.

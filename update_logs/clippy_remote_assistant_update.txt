@@ -1,0 +1,318 @@
+Microsoft Agent (Clippy) Assistant Integration Update (Remote MKLab Architecture)
+
+1. Legal & Hosting Architecture Disclosure:
+   - ZERO LOCAL BUNDLING: Absolutely no Clippy proprietary assets, character models, sprite atlas sheets (map.png), timing metadata (agent.js), or audio sound effect files (sounds-mp3.js) are stored, bundled, or packaged inside the OpenPublisher application repository or local installation.
+   - ZERO SERVER HOSTING ON OPENPUBLISHER.APP: The openpublisher.app website and hosting infrastructure do not host, store, or distribute any Clippy or Microsoft Agent proprietary content.
+   - DIRECT RUNTIME FETCH: When the user summons Clippy via the ribbon button, the desktop wrapper initiates a direct runtime client-side fetch from the open-source community project hosted by MKLab (https://mklab.eu.org/clippy/) based on the Smore Clippy.js project (Cinnamon Software / Double Agent unpacker).
+   - ON-DEMAND LAZY LOADING: No assets, stylesheets, or scripts are downloaded until the user explicitly clicks the "Clippy" button.
+
+2. Ribbon Button Placement:
+   - Location: File tab -> Help section (#about-btn-group).
+   - Position: Placed as the first item in the Help group, immediately to the left of "Knowledge Base" ([Clippy] [Knowledge Base] [About]).
+   - Design: OpenPublisher standard .tool-btn styling, featuring an authentic vector paperclip icon with animated eyes, label "Clippy", and tooltip "Summon Microsoft Agent Assistant (Clippy)".
+   - Connecting Pulse: Displays a subtle glowing pulse while connecting to the remote host for the first time.
+   - Active State: Highlights when Clippy is active on screen; clicking again cleanly hides Clippy.
+
+3. Offline & Unreachable Host Fallback Modal Dialog:
+   - 7-Second Watchdog: If the user is offline, DNS resolution fails, or the remote MKLab server cannot be reached, the loader aborts cleanly without throwing uncaught JavaScript errors or breaking the application.
+   - Flow UI Modal Window: A custom modal dialog (#custom-clippy-error-modal) appears over the workspace:
+     - Header: "Clippy Unavailable" with alert icon.
+     - Body: Explains that the remote host (mklab.eu.org) could not be reached, re-iterating that no proprietary assets are stored locally or on openpublisher.app, and advising the user to check their internet connection.
+     - Actions: [Close] button to dismiss cleanly, and [Try Again] button to retry connection.
+
+4. Complete 41-Animation Event & Ribbon Mapping Matrix:
+   Every single animation provided by the agent is deeply wired into OpenPublisher user actions:
+
+   A. Lifecycle & Summoning:
+      - Show / Greeting / Wave: Plays upon initial summon from File -> Help with speech balloon ("Hi! I'm Clippy, your OpenPublisher assistant!").
+      - GoodBye / Hide: Plays when dismissing Clippy or choosing "Hide Clippy" in the context menu.
+      - RestPose: Default neutral posture between actions.
+
+   B. File & Core Operations:
+      - Save: Triggers on File -> Save, Save As, or Ctrl+S ("Your publication has been saved!").
+      - Writing: Triggers while typing inside text boxes or editing text frames on canvas.
+      - Print: Triggers on File -> Print and File -> Booklet ("Sending document to your printer...").
+      - SendMail: Triggers on File / Home -> Share -> Email ("Preparing publication for email!").
+      - GetWizardy: Triggers on File -> New, Templates, Dashboard, and New Document wizard.
+
+   C. Export & Document Packaging:
+      - Thinking & Processing: Triggers during PDF export, XPS export, HTML save, and Pack & Go.
+      - Congratulate: Triggers when export completes or publication packaging finishes ("Export completed successfully!").
+
+   D. Proofing, Review & Inspection:
+      - CheckingSomething: Triggers on Review tab tools (Spelling check, Thesaurus, Word Count).
+      - Explain: Triggers on Accessibility Checker, Document Properties, About OpenPublisher dialog, or when clicking Clippy for tips.
+
+   E. Graphics, Art & Technical Tools:
+      - GetArtsy: Triggers on Clipart modal, WordArt (legacy/beta), Shapes menu, and Picture uploads.
+      - GetTechy: Triggers on QR Code generation, Developer HUD, and Pack & Go.
+
+   F. Canvas Operations & Searches:
+      - EmptyTrash: Triggers when deleting canvas elements (Delete / Backspace key on selected objects).
+      - Searching: Triggers on Ctrl+F Find & Replace, Clipart search, and Knowledge Base lookup.
+      - Alert: Triggers on document protection modals, unsaved changes warnings, or errors.
+      - GetAttention: Knocks on the screen glass after long user inactivity.
+
+   G. Directional Gestures & Gaze Tracking:
+      - GestureUp: Points toward the ribbon when switching ribbon tabs.
+      - GestureLeft: Points toward page list when navigating page thumbnails.
+      - GestureRight: Points toward sidebar, properties pane, or Scrapbook.
+      - GestureDown: Points toward status bar when zooming or navigating coordinates.
+      - LookLeft, LookRight, LookUp, LookDown, LookUpLeft, LookUpRight, LookDownLeft, LookDownRight:
+        Dynamic gaze tracking relative to mouse cursor position across the canvas.
+
+   H. Idle Behavioral Quirks:
+      - IdleAtom, IdleEyeBrowRaise, IdleFingerTap, IdleHeadScratch, IdleRopePile, IdleSideToSide, IdleSnooze:
+        Autonomous idle cycle engaged after 45 to 90 seconds of inactivity.
+
+   I. Interactive Click & Context Menu:
+      - Left-Click: Plays a random animation or shares authentic OpenPublisher productivity tips from the built-in 101-tip knowledge library.
+      - Right-Click Context Menu: Custom menu providing "Tell me a tip", "Animate", "Mute/Unmute Sound", and "Hide Clippy".
+
+5. Strict Singleton Enforcement (Elimination of Duplicate Spawn):
+   - Resolved dual-spawn root cause: The demo bundle script previously contained an embedded switchAgent('Clippy') call at the bottom of the script that auto-spawned a demo instance alongside the host-summoned instance.
+   - Decoupled from demo script: Switched primary loader to the clean smore-inc/clippy.js library build (https://cdn.jsdelivr.net/gh/smore-inc/clippy.js/build/clippy.min.js) while maintaining remote asset fetching from MKLab.
+   - Added pruneDuplicateClippys() runtime DOM guard to strictly enforce that exactly one .clippy element and one .clippy-balloon element can exist in the document at any time.
+
+6. Comprehensive 101-Tip OpenPublisher Knowledge Library:
+   - Expanded OPENPUBLISHER_TIPS to 101 authentic feature tips covering every major tool in OpenPublisher:
+     - Freehand Placement: Override Snap to Grid/Guides using Ctrl key.
+     - Custom Baselines & Grids: View > Guides > Grid and Baseline custom spacing and colors.
+     - Master Page Overrides: Setting page thumbnail Master Pages to 'None' for blank canvas.
+     - Ruler Calibration: Dragging ruler square intersection to reset zero-point.
+     - Canvas Tools: Scratch area toggling, multi-page side-by-side view, table cell content stripping.
+     - Export Workflows: XPS documents, single-page email bodies, high-res JPEG photo printing, Pack and Go font/image packaging, HTML newsletters, and booklet saddle-stitch printing.
+     - Document Security & Accessibility: Password protection encryption, alt-text authoring, and Accessibility Checker diagnostics.
+     - Editorial Tools: Global hyphenation, Drop Caps, Small Caps (Ctrl+Shift+K), change-case cycling (Shift+F3), and exact line spacing.
+     - Shape & Image Mastery: 3D rotation, aspect ratio preservation (Shift), center scaling (Ctrl), recoloring, pattern fills, and Edit Points for custom vector shapes.
+     - Table Controls: Quick tables, diagonal borders, cell margins, distribute rows/columns, and table-to-text conversion.
+     - UI Customization: Over 100 colorful/subtle themes and dark mode toggles.
+   - When the user left-clicks Clippy or selects "Tell me a tip" from the right-click menu, Clippy performs the Explain animation and speaks a randomly selected tip from this 101-tip library.
+
+7. Clean Hide/Show Lifecycle & Elimination of 1px Status Bar Line:
+   - Elimination of 1px Gray Line Above Status Bar:
+     - Root Cause: Loading external stylesheet "https://mklab.eu.org/clippy/css/clippyjs.css" injected Dave Gamache's 34KB Skeleton CSS framework with global resets (html, body, div, span, table...) that mutated OpenPublisher's webapp layouts and introduced a 1px border/margin shift above the status bar.
+     - Resolution: The external stylesheet dependency was completely eliminated. The clean, scoped .clippy rules (positioning, balloons, speech bubble pointer sprites) are embedded directly within OpenPublisher's host styles, leaving all webapp styles, canvas layouts, and status bar elements 100% pristine with zero layout shifts.
+   - Clean Dismissal (Elimination of Frozen Clippy Image):
+     - Root Cause: Calling _clippyAgent.play('GoodBye', callback) treated the callback function as the timeout parameter, causing an immediate exit branch and leaving the callback unexecuted. As a result, _clippyAgent.hide() was never called, leaving the draggable paperclip frame frozen on screen while interactions were disabled.
+     - Resolution: Replaced with an explicit hide/show pipeline:
+       - hideClippyAssistant() plays the native Hide animation via _clippyAgent.hide(false), immediately dismisses speech balloons, sets display: none on all .clippy DOM nodes upon animation completion, and arms a 1200ms safety timer.
+       - showClippyAssistant() unhides the DOM nodes with display: block, invokes _clippyAgent.show(true), and triggers the Greeting animation, ensuring seamless toggling without ghosting.
+
+8. Context-Aware Tip Engine & Calmed Inactivity / Click Behavior:
+   - Tip Domain Categorization:
+     - All 101 tips are partitioned into 8 context domains:
+       1. clipart_pictures (14 tips): Clipart insert, Graphics Manager, image recoloring, picture placeholders, 300 DPI export, Save as Picture, alt text.
+       2. shapes_drawing (11 tips): Geometric shapes, Shift circle/square constraint, Ctrl center scaling, pattern fills, edit points, 3D rotation, glows and shadows.
+       3. text_typography (19 tips): Text frames, hyphenation, Drop Caps, Small Caps (Ctrl+Shift+K), change case (Shift+F3), tabs, tab leaders, symbols, WordArt.
+       4. tables (10 tips): Table creation, merge/split cells, cell margins, diagonal borders, row/column distribution, strip table content, convert table to text.
+       5. layout_guides_pages (20 tips): Snap to Grid with Ctrl override, baseline guide customization, ruler zero-point calibration, custom margins, Master Pages, scratch area toggle, spreads view, duplicate pages, theme studio.
+       6. export_print_share (11 tips): PDF/XPS export, single-page email, HTML newsletter, Booklet printing, Pack & Go, CMYK commercial print prep, password encryption.
+       7. review_proofing (2 tips): Accessibility Checker, Design Checker diagnostics.
+       8. canvas_tools_general (14 tips): Zoom shortcuts, nudge keys, selection pane, business info sets, page parts, borders, dark mode.
+   - Dynamic Context Detection (getActiveClippyContext):
+     - Automatically infers the user's active workflow by checking open modals (e.g. Clipart modal), contextual ribbon tabs (Format Picture, Format Shape, Text Tools, Table Design), active canvas selections (images, shapes, tables, textboxes), and recently used ribbon tools.
+     - When working with clipart or images, Clippy strictly delivers picture/graphics tips, ensuring unrelated tips like rulers or baseline guides never disrupt the graphics workflow.
+   - Calmed Chatter & Cooldown Throttling:
+     - Routine ribbon clicks trigger subtle, silent animations (e.g. GetArtsy, CheckingSomething) rather than interrupting with speech popups on every tool selection.
+     - Single-clicking Clippy enforces a 45-second cooldown (TIP_COOLDOWN_MS = 45000) between spontaneous tips, with an 80% preference for silent whimsical animations over speech balloons.
+     - Right-click "Tell me a tip" explicitly overrides the cooldown for instant on-demand advice.
+   - Relaxed Idle Timeout:
+     - The glass-knocking (GetAttention) animation interval has been extended from 50 seconds to 3 minutes of total inactivity, and is restricted to once per idle session.
+
+9. Ribbon Icon Teal Theme Alignment, Button-Origin Slide-Down & Interactive Speech Balloon Controls:
+   - Teal Ribbon Icon Styling:
+     - The Clippy ribbon icon (#ribbon-clippy-btn .clippy-btn-icon-wrap svg) now adopts the exact OpenPublisher theme color (var(--ui-theme-dark, #007670) in light mode and var(--ui-theme-light, #2dd4bf) in dark mode).
+     - Enhanced SVG stroke width from 1.8 to 2.2 to perfectly match the bold visual glyph weight of neighboring ribbon buttons (Save as PDF, Knowledge Base, About).
+   - Button-Origin Slide-Down Entrance:
+     - Clippy now emerges directly from the ribbon button rather than arbitrary coordinates.
+     - Upon summon or toggle, Clippy's initial coordinates are mapped to the bottom edge of the Help ribbon button (getClippyButtonOrigin()).
+     - Plays a smooth slide-down animation (moveTo()) emerging straight out of the ribbon button into the workspace, accompanied by the Greeting animation.
+   - Interactive Speech Balloon Buttons & 20-Second Countdown:
+     - Classic Office Assistant Action Buttons:
+       - Greeting dialogs display [Yes] and [No] action buttons matching authentic Office assistant prompts. Clicking [Yes] immediately starts a contextual tip; clicking [No] cleanly closes the balloon.
+       - Feature Tip dialogs provide [OK], [Next Tip], and [Cancel] action buttons.
+       - Clicking [OK] or [Cancel] instantly dismisses the speech balloon.
+       - Clicking [Next Tip] immediately cycles to the next contextually relevant tip.
+     - 20-Second Countdown Auto-Dismissal:
+       - Extended the auto-hide timeout from the brief 2-second default to a comfortable 20 seconds (CLOSE_BALLOON_DELAY = 20000).
+       - Features a subtle 20-second countdown indicator bar along the bottom edge of the balloon that gracefully shows remaining reading time.
+       - Any button click dismisses the bubble immediately and clears active timers.
+
+10. Queue Deadlock Resolution, Double Size Scaling & Drag Preservation:
+   - Queue Deadlock & Toggle Crash Fix:
+     - Identified root cause in clippy.js: clippy.Queue.prototype.clear() emptied this._queue array but left this._active = true. When toggling off mid-action, _active became permanently stuck at true, causing _progressQueue() to never advance on subsequent play(), speak(), or moveTo() calls. This produced a motionless still image on re-enable.
+     - Patched clippy.Queue.prototype.clear to explicitly reset this._active = false.
+     - Patched clippy.Agent.prototype.stop to clear queue, reset _queue._active = false, clear animations, and hide balloons.
+     - Enhanced showClippyAssistant() and hideClippyAssistant() to force _queue._active = false and invoke _clippyAgent.resume(), guaranteeing seamless continuous toggle cycles.
+   - Double Size & Regular Size Context Menu Controls:
+     - Added "Regular Size" and "Double Size" options to Clippy's right-click context menu (#clippy-context-menu) with real-time teal checkmark indicators.
+     - Implemented setClippySize(doubleSize) using CSS transform: scale(2) with transform-origin: bottom right to keep Clippy grounded inside the visible viewport.
+     - Enhanced clippy.Balloon.prototype._position to use getBoundingClientRect() on target elements, ensuring speech balloons anchor precisely to the 2x scaled visual boundaries rather than overlapping the character.
+   - Drag Balloon & Countdown Preservation:
+     - Identified root cause: clippy.Agent.prototype._startDrag calls this._balloon.hide(true), which previously purged action buttons and the countdown bar from the DOM before dragging started.
+     - Added isDragHide flag to clippy.Balloon.prototype.hide(immediate, isDragHide) so that action buttons and the 20-second countdown bar are preserved during moves.
+     - On drag release (_finishDrag), the speech balloon re-anchors to Clippy's new coordinates with its action buttons and countdown timer intact and fully interactive.
+
+11. Instant Tip Cycling, Dangling Timer & Hover Protection, Zero Drag Offset & CRT Blender Filter:
+   - Next Tip Responsiveness & Instant Cycling:
+     - Identified root cause: Clicking "Next Tip" previously called self.hide(true) and speakContextualTip(), which ran _clippyAgent.play('Explain') before speak(). In clippy.js, play() queued the entire 1.5-second Explain animation, leaving the speech bubble vanished for 1.5 seconds and making the button feel completely unresponsive.
+     - Resolution: speakContextualTip() now triggers _clippyAgent.speak(chosenTip) immediately with zero queue delay, while running the Explain gesture concurrently on _animator. When clicking "Next Tip", the speech balloon stays open and transitions immediately into typing the new tip, resetting the 20-second countdown bar.
+   - Message Box Auto-Dismissal Fix & Hover Protection:
+     - Identified root cause: In clippy.js, this._hiding was never cancelled on hide(true) or speak(). If a new tip was displayed while a previous 20-second timer was still ticking down in the background, the old timer fired and killed the new balloon midway through reading it.
+     - Resolution: Explicitly cleared this._hiding across speak(), hide(), _clearActions(), _sayWords(), and stop().
+     - In addition, attached mouseenter and mouseleave listeners to .clippy-balloon: hovering pauses this._hiding and pauses the .clippy-timer-bar countdown animation; leaving resumes. The message box will never disappear while the user is reading or moving to click.
+     - Background gaze tracking and idle animations are also guarded so they never interrupt active speech balloons.
+   - Zero Drag Offset in Double Size:
+     - Identified root cause: Using transform-origin: bottom right shifted the visual element by 124px horizontally and 93px vertically relative to CSS top/left.
+     - Resolution: Switched transform-origin to top left !important. With top-left scaling, the visual top-left corner matches CSS top/left exactly. The grab point remains locked under the cursor throughout drags with mathematically zero offset (0px X, 0px Y).
+     - Patched Agent.prototype.reposition to clamp against actual 248x186 scaled dimensions so Clippy stays cleanly within window boundaries.
+   - CRT Style Blender Filter:
+     - Embedded an SVG CRT Blender Filter (#clippy-crt-filter) that transforms raw 1997 pixelated dither dots into clear, smooth, retro-authentic imagery:
+       - Bilinear dither blending (<feGaussianBlur stdDeviation="0.32">) smooths out blocky pixel noise.
+       - Unsharp edge matrix (<feConvolveMatrix kernelMatrix="0 -0.35 0 -0.35 2.4 -0.35 0 -0.35 0">) keeps paperclip wire outlines, eyes, and eyebrows razor-sharp.
+       - Subtle phosphor bloom (<feGaussianBlur stdDeviation="0.6">) delivers warm CRT glow without darkening the sprite.
+       - Component transfer enhances vibrancy and contrast.
+     - Automatically applied to .clippy.clippy-double-size as .clippy-crt-filter.
+     - Added "CRT Filter" toggle item with real-time teal checkmark in the right-click context menu.
+
+12. Animation Loop Elimination, 1.5x Intermediate Medium Size & 2px Teal Context Menu:
+   - Root Cause & Elimination of Animation Loop & Frozen Balloons:
+     - Root Cause 1: In Smore clippy.js, Balloon.prototype.hide(true) called jQuery this._balloon.hide(), but NEVER set this._hidden = true. Because this._hidden remained false, subsequent drag finishes or reposition calls invoked this._balloon.show() and restored the speech balloon to visibility. Furthermore, because _clearActions() had already detached the buttons and timer bar, the balloon reappeared as an unresponsive "zombie" bubble with no dismiss controls.
+     - Root Cause 2: In Smore clippy.js, Agent.prototype._onQueueEmpty triggered idle animations (IdleRopePile, IdleAtom, etc.) whenever the speech queue finished typing. Many idle animations utilize internal frame branching loops that cycle indefinitely until exitAnimation() is called.
+     - Root Cause 3: Clicking OK or Cancel previously only executed balloon hide(true) without canceling typing loops, stopping animations, or returning Clippy to neutral RestPose.
+     - Resolution:
+       - Patched Balloon.prototype.hide, Balloon.prototype._finishHideBalloon, and Balloon.prototype.close to explicitly set this._hidden = true, this._active = false, and clear this._loop and this._hiding.
+       - Patched Balloon.prototype.show with an explicit guard: if (this._hidden) return.
+       - Introduced dismissClippyBalloon(): immediately hides the balloon, clears and resets queue activity, calls exitAnimation(), and returns Clippy cleanly to RestPose.
+       - Wired all OK, Cancel, and No action buttons to dismissClippyBalloon().
+       - Patched Agent.prototype._onQueueEmpty: strictly prevents idle animations from playing while a speech balloon is visible on screen, and arms a 4.5-second safety exit timeout to guarantee idle animations never loop infinitely.
+   - Intermediate 1.5x Medium Size Option:
+     - Added "Medium Size" (scale 1.5) option between "Regular Size" (1x) and "Double Size" (2x) in the right-click context menu.
+     - Implemented .clippy.clippy-medium-size with transform: scale(1.5) and transform-origin: top left !important.
+     - Automatically benefits from the CRT Blender Filter when enabled.
+     - Updated setClippySize() and toggleClippyCrtFilter() to smoothly handle 'regular', 'medium', and 'double' modes with dynamic checkmark indicators.
+   - 2px Teal Green Context Menu Outline & Theming:
+     - Updated #clippy-context-menu with a 2px solid border (var(--ui-theme-dark, #007670) in light mode, var(--ui-theme-light, #2dd4bf) in dark mode).
+     - Styled menu icons with teal green theme colors to perfectly match OpenPublisher's native webapp context menu design.
+     - Enhanced context menu positioning: dynamically measures menu dimensions upon opening and clamps coordinates so the full menu remains 100% within the visible viewport on any screen resolution.
+13. Mid-Typing Drag Completion, "About Clippy" Context Menu Option & Legal Disclosure Modal:
+   - Mid-Typing Drag Completion & Controls Restoration:
+     - Identified root cause: When moving Clippy whilst text was actively typing out word-by-word in _sayWords(), clippy.Agent.prototype._startDrag invoked this._balloon.hide(true, true), which set this._active = false and cancelled this._loop. When dragging finished, Smore's Balloon.prototype.resume called this._addWord(), which immediately returned because this._active was false. As a result, the typing loop terminated permanently, leaving partial message text and preventing _renderActions() from ever executing. The balloon reappeared at the new location with partial text and completely missing the action buttons and countdown timer bar.
+     - Resolution:
+       - In Balloon.prototype._sayWords, cached this._currentText, this._currentHold, and this._currentComplete.
+       - In Balloon.prototype.hide(immediate, isDragHide), when isDragHide is true and this._active is true: immediately renders the complete message text (this._content.text(this._currentText)), generates full action buttons and timer bar via this._renderActions(this._currentText), and resolves this._currentComplete().
+       - Patched Balloon.prototype.resume: restarts the 20-second countdown timer bar animation and arms the auto-dismiss timeout cleanly upon drag release.
+       - Moving Clippy at any point during message typing now instantly reveals the full tip with complete controls and active countdown bar at Clippy's new position.
+   - "About Clippy" Context Menu Button:
+     - Added an "About Clippy" option (#clippy-menu-about) to Clippy's right-click context menu, positioned above "Hide Clippy".
+     - Styled with teal green theme icon (fas fa-info-circle) consistent with OpenPublisher's visual design.
+     - Adjusted context menu height measurement to ensure full viewport safety clamping across all screen resolutions.
+   - "About Clippy" Modal Dialog & Legal Transparency:
+     - Integrated the custom logo clippy-unofficial.webp into a base64 data URI for instant, reliable rendering in desktop webviews without local asset loading friction.
+     - Implemented #clippy-about-modal with smooth pop animation, frosted glass backdrop, and full light/dark mode theming.
+     - Structured with 3 clear, accessible cards:
+       - What is Clippy in OpenPublisher?: Welcomes the user and explains Clippy's role as a nostalgic desktop publishing assistant with 101 tips and animated gestures.
+       - How It Works: Explains smart contextual tool tracking (text boxes, tables, shapes, pictures, export), hover-pause timer, size scaling, and optional CRT filter.
+       - Legal Transparency & Architecture: Reassures users and developers on legal safeguards:
+         * Zero Bundled Proprietary Assets: OpenPublisher does not package, bundle, store, or distribute any proprietary Microsoft Agent character art, sprites, or sounds.
+         * On-Demand Community Streaming: Character animations and audio cues are fetched dynamically over HTTPS from the independent community web archive (MKLab / Smore CDN).
+         * Open Source Engine: Built upon the open-source MIT-licensed Clippy.js framework created by Smore.
+         * Independent Project & Trademark Disclaimer: OpenPublisher is independent and not affiliated with, endorsed by, or sponsored by Microsoft Corporation. Clippy and Microsoft Agent are trademarks of Microsoft Corporation.
+     - Dismissible via primary Close button, "X" corner button, clicking the backdrop overlay, or pressing the Escape key.
+14. Canvas Interactivity Restoration & Draggable Teal Toolbar About Modal:
+   - Canvas Interactivity Restoration (Text Boxes & Table Cells):
+     - Identified root cause: When global selection suppression was introduced to eliminate blue highlighting on wrapper chrome, the universal CSS rule (*, *::before, *::after) applied user-select: none to the <webview> container element. Additionally, window selectstart and dragstart listeners intercepted selection events across the shell if e.target.tagName !== 'WEBVIEW'. Finally, capture-phase listeners in guestClippyScript called e.target.closest() without defensive node checks, causing TypeErrors when clicking text nodes inside contenteditable elements.
+     - Resolutions applied:
+       * Webview Container Selection Override: Explicitly added -webkit-user-select: auto !important, user-select: auto !important, and -webkit-user-drag: auto !important to webview, #app-view in wrapper.html.
+       * Composed-Path Aware Selection Safeguards: Updated selectstart and dragstart window listeners to inspect e.composedPath(), immediately bypassing any event originating from the webview or interactive input/contenteditable elements.
+       * Hardened Guest Context Event Listeners: Switched click, input, and keydown listeners in guestClippyScript to standard bubbling phase (false) and added defensive node checks (e.target.nodeType === 1 ? e.target : e.target.parentElement) to eliminate capture-phase exceptions on text nodes and table cells.
+       * Text selection, caret placement, and typing in text boxes and table cells are now 100% restored and fully interactive.
+   - Draggable "About Clippy" Modal with Teal Toolbar & Enlarged Icon:
+     - Redesigned the #clippy-about-modal into a draggable window matching native wrapper/webapp dialogs:
+       * Teal Titlebar Toolbar: Styled with background: var(--ui-theme-dark, #007670) !important, white bold title ("About Clippy"), info badge, and custom close button (#clippy-about-x-btn) with red hover transition (#d35450).
+       * Freeform Dragging: Implemented mousedown drag handlers on the header with smooth viewport boundary clamping so the modal can be moved anywhere on screen without escaping the visible area.
+       * Enlarged Logo Display: Increased the custom clippy-unofficial.webp logo dimensions from 48px to 76px x 72px with crisp drop-shadow (filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22))), prominently displayed in the introductory header card.
+       * Maintained All 3 Educational & Legal Cards: "What is Clippy in OpenPublisher?", "How It Works", and "Legal Transparency & Architecture" (zero local bundled assets, on-demand community streaming, MIT-licensed engine, and trademark disclaimer).
+       * Rounded Pill Footer Button: Styled the bottom Close button with a 20px pill border radius and teal accent matching OpenPublisher's modal button standards.
+15. Floating 4:3 About Window, Animator Sound Fortification & Print Serializer Watchdog:
+   - Transparent Floating About Clippy Window (No Gray/Blur Backdrop):
+     - Removed full-screen dark and blurred overlay backdrop entirely (background: transparent !important, backdrop-filter: none !important).
+     - Applied pointer-events: none to modal container and pointer-events: auto to .clippy-about-box, allowing the dialog to float directly over the active canvas and UI without obscuring or blurring the document underneath.
+     - Upgraded box-shadow with deep dual-layer elevation (0 16px 44px rgba(0, 0, 0, 0.42), 0 4px 12px rgba(0, 0, 0, 0.18)) for crisp separation against any canvas content.
+   - Proportional 4:3 Squarish Geometry:
+     - Adjusted modal dimensions to 640px x 480px (exact 4:3 standard aspect ratio), eliminating the overly tall 9:16 portrait appearance.
+     - Rebalanced internal padding (13px 18px) and card spacing (10px) to provide comfortable, scrollable reading of all 3 informative cards within classic desktop proportions.
+     - Centered initial summon position based on 640x480 geometry with viewport boundary clamping during freeform drag.
+   - Clippy Animator Sound Exception Fortification:
+     - Identified root cause of frozen Clippy during print: Clippy's 'Print' animation includes audio cues (sound '15' on frame 0, sound '5' on frame 4). In NW.js/Chromium, when HTML5 Audio play() threw or rejected due to autoplay restrictions, missing decoders, or network stream delays, the unhandled error crashed _step() before scheduling the next animation timeout, freezing Clippy permanently. Clicking the character triggered resume() which advanced exactly one frame before halting again.
+     - Patched clippy.Animator.prototype._playSound with a defensive try-catch block and swallowed unhandled play() promise rejections.
+     - Patched clippy.Animator.prototype._step with loop recovery: if an unexpected exception occurs during any frame draw or audio trigger, the animation loop automatically catches the error and reschedules the next frame via setTimeout.
+   - Print Serializer Deadlock Watchdog & UI Recovery:
+     - Wrapped printFullDocument and printBooklet with an intelligent 20-second watchdog: if the page serializer or texture preloader ever deadlocks or hangs (e.g. on unresolvable cross-origin background textures or html2canvas resource contention), the watchdog automatically disarms, cleans up any orphaned #pdf-print-staging DOM element, and dismisses DialogSystem modal overlays, ensuring the canvas is never left locked or unresponsive.
+     - Attached native app hooks immediately upon guestClippyScript startup so print protection and context tracking are active from the first millisecond, whether Clippy has been summoned or not.
+   - Print Queue Stutter Optimization (export_queue.html):
+     - Replaced unthrottled 50ms interval DOM rewrites in export_queue.html with requestAnimationFrame and state-change detection, updating the DOM only when numeric progress increments, eliminating CPU contention and micro-stutters during multi-page print serialization.
+16. Project Link Integration, Prominent Legal Disclaimers & Engine Title Sizing:
+   - Clippy.js Project Link Integration:
+     - Embedded a dedicated GitHub project button ("View Clippy.js Project") in the introductory header card with the official GitHub icon and external link chevron.
+     - Added inline hyperlinked references to https://github.com/smore-inc/clippy.js within the Open Source Foundation section.
+     - Routed all external links through a safe shell handler that invokes nw.Shell.openExternal() in NW.js (or window.open() as fallback), ensuring external pages open cleanly in the user's default web browser without disrupting the application window.
+   - Prominent Legal Transparency & Trademark Disclaimer:
+     - Upgraded the legal card styling (.clippy-about-legal-card) with a signature teal border-left accent (4px solid var(--ui-theme-dark, #007670)) and light tinted background.
+     - Added an uppercase "Important Notice" pill badge alongside the card title for immediate visual recognition.
+     - Enclosed the Microsoft Corporation trademark disclaimer in a distinct highlighted callout box (.clippy-disclaimer-box) featuring an information icon and dedicated header, making it significantly easier to notice and read.
+   - Dual-Sized Title Styling: "Clippy (clippy.js)":
+     - Updated the header title in the introductory banner to display "Clippy (clippy.js)", with the main character name rendered at 19px bold teal and the engine indicator "(clippy.js)" styled in a smaller 13px medium weight tag (.clippy-about-title-tag) to achieve clear visual hierarchy.
+     - Updated the teal titlebar header text to also read "About Clippy (clippy.js)" with subtle proportional sizing.
+
+17. Tip Spam Suppression & Silence Mode (Silence Tips / Resume Tips):
+   - Normalized Right-Click Context Menu Action:
+     - Added an intuitive tip suppression option (#clippy-menu-silence) directly beneath "Mute Sound" in the right-click context menu.
+     - Dynamic action naming:
+       * When chatty (default): Displays "Silence Tips" with a muted comment icon (fas fa-comment-slash).
+       * When silenced: Flips to "Resume Tips" with an active comment bubble icon (fas fa-comment-dots).
+     - Styled with white-space: nowrap to ensure smooth layout integrity without line wrapping on narrow viewports.
+   - Comprehensive Unsolicited Tip Suppression:
+     - Intercepts all automatic tip triggers when _clippySilenced is true:
+       * Suppresses spontaneous click tips: Left-clicking Clippy exclusively triggers lively, non-intrusive character animations (_clippyAgent.animate()) without opening speech balloons.
+       * Suppresses initial summon greeting balloon: Summoning Clippy via ribbon button plays his signature slide-down and wave animation (Greeting) peacefully without popping up speech text.
+       * Suppresses idle/contextual chatter: Automatic tip cycling (speakContextualTip) cleanly returns null when unsolicited.
+   - Immediate Snooze Animation & Balloon Dismissal:
+     - Clicking "Silence Tips" instantly closes any active speech balloon via dismissClippyBalloon().
+     - Triggers the classic IdleSnooze animation, where Clippy closes his eyes and takes a peaceful nap on screen.
+     - Unsilencing Clippy ("Resume Tips") immediately plays the celebratory Wave gesture.
+   - Explicit On-Demand Tip Bypass:
+     - If the user explicitly selects "Tell me a tip" from the right-click context menu or clicks "Next Tip" in an active bubble, Clippy honors the manual request (isManual = true) and delivers advice on-demand even while in silenced mode.
+   - Persistent User Preference:
+     - Persists silence mode in localStorage under 'op_clippy_silenced'.
+     - Automatically restores the user's preferred conversational volume across application restarts and summon cycles.
+
+18. Performance Optimization & 3D Element Rasterization Freeze Fix:
+   - Root Cause Identification:
+     - Investigated the up to 5-minute freeze during 3D element rasterization ('Rasterizing 3D Element...'), print rasterization, and 'Save as Picture'.
+     - Identified that html2canvas 1.4.1 clones document.documentElement into an iframe sandbox before rendering any element.
+     - The cloned document included over 83 off-canvas images (Unsplash thumbnails, DuckDuckGo proxy URLs, template previews, and hidden clipart galleries inside #dashboard-overlay, #template-modal, etc.).
+     - In NW.js webview, unresolvable cross-origin requests and ORB-blocked proxy images left image load promises pending without firing load or error events, causing html2canvas's internal iframeLoader to wait up to Chromium's 300-second (5-minute) socket timeout.
+   - Intelligent DOM Isolation Guardian (installHtml2CanvasOptimizer):
+     - Injected an intelligent proxy wrapper around window.html2canvas:
+       * Isolated Element Mode (3D shape rasterization, WordArt print masks, temp staging boxes): Filters out 100% of non-ancestor and non-descendant DOM nodes from the clone while preserving <head> stylesheets and fonts. Reduces cloned images from 83+ to 0 and cloned nodes to minimal essentials.
+       * Full-Page Mode (Export and Booklet Print): Automatically ignores off-canvas dialogs, overlays, modals, and auxiliary toolbars (#dashboard-overlay, #template-modal, #splash-screen, #web-clipart-modal, #clippy-container, etc.), preventing hung off-screen resources from being requested in the clone.
+       * Fast-Fail Image Timeouts: Caps imageTimeout to 2500ms (down from 15,000ms) to ensure slow network assets never stall processing.
+     - Reduced 3D shape rasterization time from 300,000ms (5 minutes) down to ~180-260ms (over 1,000x faster).
+   - Background Serialization & Observer De-confliction:
+     - Main-Thread Contention Elimination: Marked window._rasterizingActive during rasterization passes to instruct _runDirtyCheck to bypass serializeCurrentPage() and JSON.stringify() while the 3D projection or print pipeline is executing.
+     - Guarded serialization during modal interactions and throttled dirty check interval from 1500ms to 3000ms.
+     - Disconnected suppressGuestSplash MutationObserver once #splash-screen is suppressed (with a 10s maximum watchdog), eliminating redundant DOM traversal on every canvas action.
+     - Debounced the spellcheck enforcer MutationObserver (350ms delay) to prevent expensive querySelectorAll scans across the full document during heavy batch DOM operations.
+
+19. Alt + H Keyboard Shortcut & Context Menu Toggle Injections:
+   - Global Alt + H Keyboard Shortcut:
+     - Host Window Listener: Added global Alt + H hotkey listener in the NW.js host window (wrapper.html), intercepting the combination and forwarding window._toggleClippyAssistant() to the embedded webview via executeScript.
+     - Guest Page Listener: Added capture-phase keydown event listener in guestClippyScript (Alt + H), allowing users to instantly summon or dismiss Clippy from anywhere within the canvas, text fields, or ribbon tabs.
+   - Dual Context Menu Injection (hookContextMenuForClippy):
+     - Hooked OpenPublisher's native ContextMenuSystem.handleRightClick to inject a dedicated "Toggle Clippy" action:
+       * Scratch Area Menu: Injected directly after "3D Topology View" within the viewport action group.
+       * Page Menu: Injected beneath "Format Background" separated by a clean pub-context-divider.
+     - Dynamic Teal Checkmark Indicator: Inspects active visibility state and renders a crisp teal checkmark (<i class="fas fa-check">) when Clippy is active, omitting the checkmark when hidden.
+     - Smooth Click-Through: Triggers toggleClippyAssistant() and automatically dismisses the context menu via ContextMenuSystem.hide().

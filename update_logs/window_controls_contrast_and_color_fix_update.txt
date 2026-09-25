@@ -1,0 +1,40 @@
+================================================================================
+UPDATE LOG: Windows Window Controls Contrast & Auto-Healing Color Fix
+================================================================================
+Date: September 13, 2026
+Component: wrapper.html (Titlebar Window Controls Subsystem)
+
+OVERVIEW:
+Fixed an issue where the Windows-style window controls (the theme switcher droplet,
+minimize line, maximize square, and close X) rendered in dark gray/black (#333333)
+against colored and dark titlebars (such as Classic Teal, Sunset Orange, or default
+petroleum green). The controls are now guaranteed to render in crisp white (#ffffff)
+with automatic luminance-contrast calculation and dynamic state healing.
+
+ROOT CAUSE:
+1. When theme updates were evaluated with mode: 'light' (such as standard non-dark
+   themes like 'Publisher / Classic (Teal)' or 'Sunset (Orange)'), the theme IPC
+   handler erroneously executed:
+     root.style.setProperty('--accent-color', '#333333');
+   This assumed that light mode meant a white background, despite the titlebar
+   background (--bg-color) remaining vibrant teal (#007670 / #146F6E).
+2. The .win-btn svg elements rely on stroke: var(--accent-color), causing the
+   stroke color to invert to black against the teal titlebar.
+3. This dark accent value was persisted into localStorage key 'op_saved_theme',
+   causing subsequent restarts to reload the black stroke color.
+
+KEY FIXES & ARCHITECTURAL HIGHLIGHTS:
+1. Dynamic Luminance-Contrast Calculation:
+   - Added a global getContrastAccent(bg) function in wrapper.html that calculates
+     the relative perceived luminance (0.299*R + 0.587*G + 0.114*B).
+   - If the background luminance is dark or saturated (< 180), it yields '#ffffff'.
+   - If the background is ultra-light (> 180), it yields '#333333'.
+2. Pre-Render & Window-Init Auto-Healing:
+   - Updated both the early synchronous <head> script and the secondary window
+     initialization routine to evaluate effectiveBg and detect stale '#333333'
+     accents on dark backgrounds.
+   - Stale values are immediately healed to '#ffffff' and resaved to localStorage.
+3. CSS Fallback Hardening:
+   - Updated .win-btn svg rule to stroke: var(--accent-color, #ffffff) ensuring
+     a resilient white fallback.
+================================================================================

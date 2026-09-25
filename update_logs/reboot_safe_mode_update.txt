@@ -1,0 +1,10 @@
+# Reboot in Safe Mode (Developer HUD)
+
+## Overview
+Added a reliable mechanism to reboot the wrapper in Safe Mode directly from the Developer HUD, along with a visual indicator so users know they are in a restricted boot state.
+
+## Changes Made
+1. **Developer HUD Button**: Added a 'Reboot Safe Mode' button to the Quick Actions section in the Dev HUD (accessed via Ctrl+Shift+D).
+2. **Reboot Logic**: Wired the button to use Node.js "child_process.spawn". It launches a fresh, detached instance of the application with the "--safe-mode" flag and cleanly exits the current instance via "nw.App.quit()".
+3. **Visual Badge**: Updated the wrapper's boot logic to check if "nw.App.argv.includes('--safe-mode')" is true during startup. If present, it dynamically creates a red "[SAFE MODE]" badge and injects it into the "#controls-wrapper" in the titlebar, providing an immediate, visible confirmation of the restricted state.
+- Made the "[SAFE MODE]" badge clickable. When clicked, it displays a native modal explaining Safe Mode and provides a "Reboot Normally" button to easily exit the restricted state without command-line knowledge.

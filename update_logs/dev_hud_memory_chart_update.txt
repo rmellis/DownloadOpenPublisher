@@ -1,0 +1,13 @@
+# Memory Footprint Bar Chart & Live Rate Monitor (Developer HUD)
+
+## Overview
+Enhanced the memory tracking logic inside the Developer HUD in wrapper.html with dynamic min-max auto-zoom, a real-time RSS Rate / Window Range text field, and GPU-accelerated compositing to eliminate subpixel flicker artifacts.
+
+## Changes Made
+1. **Dynamic Window Auto-Zoom**: Replaced static 20% headroom baseline with an auto-scaling window algorithm. It scales bar heights dynamically between the active 20-sample minimum and maximum (with a 1 MB minimum span cushion) so subtle allocations (e.g. 200 KB) and garbage collection drops produce visible contours and waves instead of flat full-height bars.
+2. **Dedicated RSS Rate & Range Text Field**: Added a dedicated readout row (#dev-stat-rss-rate) beneath the chart displaying the live rate of change per second (+KB/s [UP], -KB/s [DOWN] (GC), or 0 KB/s (Steady)) along with the 20-sample minimum and maximum megabyte span (min-max MB).
+3. **Inspector Sync**: Hovering over any individual bar instantly logs that bar's exact sample number, time offset, and megabyte reading directly into the text field, reverting seamlessly to the live rate on mouse leave.
+4. **Subpixel & Flicker Fix**: Eliminated dirty-rect rasterization artifacts and stray flickering pixels on the leftmost bar by:
+   - Promoting the chart container and bars to dedicated GPU composited layers (transform: translateZ(0) and contain: paint).
+   - Removing layout-thrashing transition: height animations so the rolling snapshot bars update cleanly in single frame passes without subpixel edge residue.
+   - Adding overflow: hidden to clip fractional boundary antialiasing.

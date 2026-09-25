@@ -1,0 +1,119 @@
+================================================================================
+UPDATE LOG: OpenPublisher V5 Linux Emoji Font Support & First-Run Asset Restore
+================================================================================
+Date: September 20, 2026
+Component: wrapper.html, fonts/fonts.css, fonts/NotoColorEmoji.ttf (new),
+           firstrun_assets/ (restored)
+
+OVERVIEW:
+Resolved two display regressions affecting the OpenPublisher V5 Linux edition.
+First, emoji characters entered as plain Unicode text were rendering as empty
+tofu squares on Linux systems that do not have a colour emoji font installed
+system-wide. Second, all slide images in the First Run Wizard onboarding
+experience were absent due to the firstrun_assets/ directory not being
+transferred during the initial NAS deployment to the installation folder.
+
+================================================================================
+ISSUE 1: EMOJI RENDERING ON LINUX (NO SYSTEM EMOJI FONT)
+================================================================================
+
+Root Cause:
+On Windows and macOS, an emoji colour font (Segoe UI Emoji / Apple Color Emoji)
+is installed by default and Chromium's font fallback chain resolves emoji
+codepoints automatically. On Linux distributions that have not explicitly
+installed a colour emoji package (fonts-noto-color-emoji or equivalent), no
+such fallback exists. The NW.js Chromium renderer falls through the entire
+font-family stack without finding a glyph for any Unicode emoji codepoint,
+resulting in hollow replacement squares (U+FFFD tofu blocks) for characters
+such as ✅ ✨ 🎨 📄 💡 and all other emoji used in the wrapper UI.
+
+Fix Applied:
+
+1. Bundled Font — fonts/NotoColorEmoji.ttf:
+   Copied Noto-COLRv1.ttf (v2.051) from the Google Fonts Noto Emoji project
+   into the fonts/ directory as NotoColorEmoji.ttf. Selected the COLRv1 variant
+   (4.8 MB) over the legacy CBDT/PNG-embedded variant (10.7 MB) because NW.js
+   v0.116.0 embeds Chromium 116+ which has full native COLRv1 colour font
+   support, yielding identical visual output at significantly smaller file size.
+
+2. @font-face Declaration — fonts/fonts.css:
+   Registered the bundled font under the family name 'Noto Color Emoji' with
+   a strict unicode-range descriptor encompassing all standard emoji Unicode
+   blocks:
+   - Miscellaneous Symbols (U+2600–U+26FF)
+   - Dingbats (U+2700–U+27BF)
+   - Emoticons and Supplemental Symbols (U+1F000–U+1FFFF)
+   - Enclosed Alphanumerics / Enclosed CJK (U+24C2, U+3297, U+3299)
+   - Variation Selector 16 (U+FE0F) for emoji presentation forcing
+   - All miscellaneous indicator, arrow, clock, and symbol ranges
+   The unicode-range scoping ensures the emoji font is ONLY activated for
+   actual emoji codepoints. All text glyphs continue to be served by Inter
+   and the system sans-serif fonts exclusively, with zero visual side-effects
+   on any text rendering.
+   font-display: block is used (rather than swap) to prevent a flash of tofu
+   during the brief font-load window; the font file is local and loads
+   near-instantaneously from the installation directory.
+
+3. Font-Family Stack — wrapper.html body rule (line 127):
+   Appended the emoji font family names to the root <body> font-family
+   declaration:
+       ..., sans-serif, 'Noto Color Emoji', 'Apple Color Emoji',
+       'Segoe UI Emoji', 'Segoe UI Symbol'
+   Because this is the cascade root, all descendant elements (splash screen,
+   first-run wizard, modals, title bar) inherit the emoji fallback
+   automatically without requiring changes to any individual font-family
+   declaration elsewhere in the file. Platform-native emoji fonts
+   ('Apple Color Emoji', 'Segoe UI Emoji') are listed after 'Noto Color Emoji'
+   so the bundled font takes precedence on Linux while having no effect on
+   Windows or macOS where the platform fonts are resolved first by the
+   @font-face unicode-range miss (the native fonts satisfy the codepoint
+   before Noto is consulted).
+
+Affected UI Areas:
+   - Splash screen initialisation checkmarks (✅)
+   - First Run Wizard "Get Started" sparkle (✨)
+   - Any emoji inserted into document text via the webapp webview
+   - All modal dialogs and notification areas using direct emoji characters
+
+================================================================================
+ISSUE 2: FIRST RUN WIZARD SLIDE IMAGES MISSING
+================================================================================
+
+Root Cause:
+The firstrun_assets/ directory containing all onboarding slide screenshots,
+theme preview thumbnails, and the navigation arrow SVG was not included in the
+transfer from the NAS storage location to the final installation directory.
+The image onerror handler correctly fell back to Font Awesome icon placeholders,
+however this produced a degraded first-run experience.
+
+Fix Applied:
+Restored the complete firstrun_assets/ directory tree from NAS source:
+   firstrun_assets/
+     slides/      — slide1_welcome.webp through slide8_create.webp
+     ui/          — right-arrow.svg (Next / Get Started button arrow)
+     themes/
+       dark/      — true-dark.png, teal_dark.png, blue_dark.png,
+                    purple_dark.png, green_dark.png, yellow_dark.png
+       light/     — theme_teal.webp, theme_dark.webp, theme_blue.webp,
+                    theme_purple.webp, theme_orange.webp
+
+No code changes were required. All image references in FIRSTRUN_SLIDES and
+renderFirstRunSlide() were already correctly authored; only the asset files
+themselves were absent.
+
+================================================================================
+FILES CHANGED:
+================================================================================
+
+  MODIFIED  fonts/fonts.css
+              + @font-face 'Noto Color Emoji' with unicode-range (emoji only)
+
+  NEW       fonts/NotoColorEmoji.ttf  (4.8 MB — Noto COLRv1 v2.051)
+
+  MODIFIED  wrapper.html
+              + 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji',
+                'Segoe UI Symbol' appended to body font-family stack
+
+  RESTORED  firstrun_assets/  (full directory tree from NAS backup)
+
+================================================================================

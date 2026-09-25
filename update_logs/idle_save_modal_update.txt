@@ -1,0 +1,38 @@
+# Update: Non-Stacking In-App Idle Save Notice
+
+## Overview
+Replaced the previous automatic Save As popup behavior that stacked native Windows file picker dialogs when users were away from their desk with a single, non-stacking in-app modal dialog. The notice informs the user that they have been away for 10 minutes with unsaved work, providing direct "Save As" and "Ignore" actions.
+
+## Changes Made
+1. **Single In-App Modal Dialog (wrapper.html)**:
+   - Added #custom-idle-save-overlay and draggable #custom-idle-save-modal styled consistently with Open Publisher dialogs.
+   - Draggable header (#custom-idle-save-header) titled "Unsaved Work" with close button ('X').
+   - Visual notice featuring an idle clock badge and clear message:
+     - "You have been away for 10 minutes."
+     - "Your publication has not been saved yet. Would you like to save it as a file now, or ignore for now?"
+   - "Save As" button: Dismisses the modal and triggers window.saveDocument(), prompting the native Windows Save As dialog for the user to choose their save path.
+   - "Ignore" button: Dismisses the notice and allows the user to continue working without interruptions.
+   - Close button ('X'): Dismisses the notice cleanly.
+
+2. **Single-Instance Anti-Stacking Guard**:
+   - When the user is away and idle state fires, the wrapper checks if the modal is already open (idleSaveOverlay.style.display === 'flex').
+   - If already visible, the dialog is left as is. It will never spawn duplicate dialogs or stack popups regardless of how long the user remains away.
+
+3. **Chromium Idle Handler Refinement (chrome.idle)**:
+   - Preserved the 10-minute idle detection threshold (chrome.idle.setDetectionInterval(600)).
+   - Saved Documents (activeFilePath !== null): Automatically saved silently in the background when unsaved modifications exist (_isDocumentDirty === true), maintaining seamless background auto-save without UI disruptions.
+   - Unsaved Documents (activeFilePath === null): Strictly prevents programmatically triggering native file dialogs while the user is away. Instead, displays the single in-app modal if unsaved changes exist.
+
+4. **Automatic Dismissal on Save**:
+   - The modal automatically dismisses whenever activeFilePath is set or when a save completes successfully.
+
+5. **Dual-Trigger Workspace Inactivity & Canvas Dirty Detection Engine**:
+   - Active In-App Inactivity Timer: The wrapper now maintains a direct in-app activity clock (lastUserActivityTime) updated by user interactions in both the wrapper and the webview (OP_USER_ACTIVITY). If 10 minutes elapse without workspace interaction, the idle action triggers reliably even if the user is active in other applications on their computer.
+   - Live Canvas Dirty Synchronization: Fixed dirty detection for blank documents by invoking serializeCurrentPage() in the dirty checking interval and probing #paper for user elements. Adding text, shapes, or images to a blank document now immediately marks the document dirty, shows the titlebar (*) indicator, and arms the idle notice.
+   - Dual-Path OS & Inactivity Triggers: Combines the 10-minute in-app inactivity timer with Chromium's chrome.idle.onStateChanged (with "idle" permission declared in package.json), ensuring idle notices fire under all working scenarios.
+
+6. **Save As Document Title & Metadata Synchronization**:
+   - File Basename Linking: When saving via Save As (or from the idle save modal), the chosen file path basename (e.g., "MyProject" from "MyProject.opub") is now dynamically applied as the publication title.
+   - Live Titlebar DOM Update: Updates #doc-title inside the webview immediately upon save selection, replaces any generic default title (such as "Publication 1"), and dispatches change events.
+   - Saved File Payload Update: Updates the "title" property inside the JSON publication content before writing to disk, ensuring that re-opening the document preserves the user's chosen title.
+   - Active Path Hook: In setActiveFilePath(), automatically updates generic titles ("Publication 1", "Untitled") to match the file's disk basename.

@@ -1,0 +1,37 @@
+OpenPublisher - Renderer Crash Handling & Auto-Restart Recovery
+
+Overview:
+Introduced a comprehensive fail-safe and recovery mechanism for OpenPublisher to gracefully handle out-of-memory (OOM) errors and catastrophic Chromium renderer crashes. Instead of leaving the user staring at a frozen or blank white screen, the application captures the crash, records a diagnostic report, automatically spawns a fresh instance with the custom `--recovered` flag, triggers a native Windows notification, and presents an interactive Firefox-style recovery dialog ("Well, This Is Awkward...").
+
+Core Components & Architecture:
+
+1. Crash Event Detection & Diagnostic Logging (wrapper.html):
+   - Actively monitors the webview lifecycle through `crashed`, `plugin-crashed`, and `killed` events.
+   - Generates an instant diagnostic crash report on the user's Desktop (`OpenPublisher-Crash-Log.txt`) detailing timestamp, uptime, active file, HUD metrics, process memory (RSS/heap), and system environment specs.
+
+2. Auto-Restart via Child Process Spawn:
+   - Uses Node's `child_process.spawn` with `{ detached: true, stdio: 'ignore' }` to immediately spawn a clean, independent instance of OpenPublisher (`nw.exe`).
+   - Automatically passes the custom `--recovered` flag and preserves the active publication file path.
+   - Cleanly calls `nw.App.quit()` on the defunct crashed process to prevent orphaned windows.
+
+3. Native Windows OS Recovery Notification:
+   - When OpenPublisher boots and detects `--recovered` in `nw.App.argv`, it fires a native Windows notification toast:
+     Title: "OpenPublisher"
+     Message: "OpenPublisher recovered from an unexpected crash."
+
+4. Interactive Recovery Dialog ("Well, This Is Awkward..."):
+   - Displays a branded modal with a teal green header and the white OpenPublisher logo.
+   - Features the custom `cr.png` artwork depicting the publication document shivering in rubble.
+   - Friendly copy: "Looks like the application had a bit of a breakdown. We found your work shivering in the rubble. Want to try and salvage what's left of it?"
+   - Three actionable options:
+     - "Attempt Recovery" (Teal): Automatically restores the most recent auto-save / backup snapshot from the vault or reloads the active document.
+     - "Let It Burn" (Red): Discards the crashed state and starts fresh with a blank canvas.
+     - "Pretend This Didn't Happen" (White/Teal): Closes the dialog and returns to the current workspace without altering files.
+
+5. Developer HUD Crash Simulator:
+   - Added a red "Crash Renderer" button in the Debug HUD (`Ctrl+Shift+D`) under Quick Actions so the entire recovery workflow can be tested live at any time without hunting through Windows Task Manager.
+
+Testing & Verification:
+- Verified via `.\nw.exe --recovered` that the notification and recovery dialog launch cleanly.
+- Verified all three buttons ("Attempt Recovery", "Let It Burn", "Pretend This Didn't Happen") perform their expected restore/reset actions.
+- Verified visual alignment with `cr.png` matches the design mockup.

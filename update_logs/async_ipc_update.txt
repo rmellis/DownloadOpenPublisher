@@ -1,0 +1,16 @@
+# Non-Blocking Saves & Async IPC Update
+
+## Overview
+We've significantly improved the performance of the save process in Open Publisher. Previously, users might have noticed the application briefly freezing or stuttering when saving large documents. This update completely eliminates that UI freeze.
+
+## What Was Happening?
+Under the hood, the application's core (`wrapper.html`) communicates with the editor interface using an Inter-Process Communication (IPC) bridge. The old bridge relied on a synchronous method (`window.prompt`) to pass your document data to the file system. Because it was synchronous, the app had to stop everything else it was doing (freezing the interface) until the data was fully handed over.
+
+## The Solution
+We have rewritten the IPC bridge to use an asynchronous data stream via the native `consolemessage` event.
+
+- **Asynchronous Data Transfer**: Document data is now passed in the background via a serialized `OP_IPC:` stream. The interface remains fully responsive while the save is being processed, and this method safely bypasses the strict origin-isolation rules that block standard `postMessage` requests in webviews.
+- **Improved Dialog Handling**: By removing the save data from the dialog pipeline, standard alerts and prompts within the app will also perform more cleanly and reliably.
+
+## User Impact
+You should experience a much smoother, uninterrupted workflow, especially when saving frequently or working with massive publications. The save process is now completely invisible to the main thread.

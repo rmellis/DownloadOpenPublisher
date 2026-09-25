@@ -1,0 +1,256 @@
+================================================================================
+UPDATE LOG: OpenPublisher V5 Native FreeBSD Port & Standalone Package Pipeline
+================================================================================
+Date: September 23, 2026
+Component: electron-main.js, electron-preload.js, wrapper.html, inject.js,
+           build-pkg.sh, package.json, assets/icons/
+Version: 5 (FreeBSD Edition)
+
+OVERVIEW:
+Comprehensive documentation of the native FreeBSD port of OpenPublisher V5.
+Due to the absence of official FreeBSD support in NW.js (and Linuxulator glibc
+and DRM incompatibilities preventing x86_64 Linux NW.js binaries from running
+reliably), OpenPublisher V5 was successfully ported to FreeBSD using a high-
+performance, zero-overhead dual-runtime bridge on top of native FreeBSD Electron.
+This update log highlights the key user-facing features (native .opub document
+associations, complete system icon integration, desktop application shortcuts,
+and bundled standalone execution) as well as the underlying architectural
+engineering that powers the FreeBSD edition.
+
+================================================================================
+HIGHLIGHTED MAIN FEATURES & USER EXPERIENCE
+================================================================================
+
+1. NATIVE .OPUB FILE ASSOCIATION & DOCUMENT HANDLING:
+   - Full OS-Level Double-Click Launching:
+     Double-clicking any .opub project file in any FreeBSD desktop file manager
+     (Thunar, Caja, Dolphin, PCManFM, Nautilus) opens it directly in OpenPublisher.
+   - Shared-MIME Specification:
+     Installs /usr/local/share/mime/packages/openpublisher.xml defining
+     'application/x-openpublisher' mapped to the glob pattern '*.opub'.
+     The installer automatically executes update-mime-database and
+     update-desktop-database upon installation and removal.
+   - Intelligent Single-Instance Forwarding:
+     Opening a second .opub file while OpenPublisher is already running will
+     NOT launch a sluggish duplicate window. Instead, the running instance
+     is detected via app.requestSingleInstanceLock(), automatically restored
+     from minimized state, brought to the foreground, and instructed via IPC
+     to load the new document immediately.
+   - Custom Document Branding Thumbnail:
+     .opub files in folders and on the desktop render with the official
+     OpenPublisher document icon rather than a blank generic file icon.
+
+2. SYSTEM ICONS & OFFICIAL V5 VISUAL BRANDING:
+   - True V5 Squircle Branding:
+     Replaced generic document icons with the official high-resolution
+     OpenPublisher V5 squircle application icon (OpenPublisherv5Icon.png).
+   - Multi-Resolution Hicolor Icon Hierarchy:
+     During the build process, the icon is rendered across all standard
+     FreeBSD / XDG hicolor dimensions:
+       * 512x512 (/usr/local/share/icons/hicolor/512x512/apps/openpublisher.png)
+       * 256x256 (/usr/local/share/icons/hicolor/256x256/apps/openpublisher.png)
+       * 128x128 (/usr/local/share/icons/hicolor/128x128/apps/openpublisher.png)
+       * 64x64   (/usr/local/share/icons/hicolor/64x64/apps/openpublisher.png)
+       * 48x48   (/usr/local/share/icons/hicolor/48x48/apps/openpublisher.png)
+       * 32x32   (/usr/local/share/icons/hicolor/32x32/apps/openpublisher.png)
+   - Desktop & Window Switcher Polish:
+     Guarantees pixel-crisp, anti-aliased visual presentation in application
+     launchers (XFCE Whisker Menu, KDE Kickoff, MATE Menu), docks (Plank,
+     Cairo-Dock), taskbars, and Alt-Tab window switchers.
+   - Distinct Document Mimetype Icon:
+     Installs matching icons into mimetypes/application-x-openpublisher.png
+     so that the document icon is distinct from the primary application icon.
+
+3. SYSTEM SHORTCUTS, DESKTOP LAUNCHER & CLI INTEGRATION:
+   - Standard XDG Desktop Entry:
+     Installs /usr/local/share/applications/openpublisher.desktop with
+     appropriate categories (Office; Graphics; Publishing;) and startup
+     window class matching (StartupWMClass=openpublisher).
+   - Global Command-Line Shortcut:
+     Installs a high-performance shell launcher to /usr/local/bin/openpublisher.
+     Users can launch OpenPublisher from any terminal window or script simply by
+     typing:
+       $ openpublisher
+       $ openpublisher /path/to/my_document.opub
+     All command-line arguments ($@) are forwarded directly to the application.
+   - Native Keyboard Shortcuts:
+     Complete shortcut parity across FreeBSD (using Ctrl+S for Save, Ctrl+Z
+     for Undo, Ctrl+Y / Ctrl+Shift+Z for Redo, Ctrl+P for Print/Export, and F11
+     for Fullscreen toggle).
+
+4. 100% STANDALONE PACKAGE (ZERO USER DEPENDENCIES):
+   - Standalone FreeBSD .pkg Installer (openpublisher-5.pkg):
+     End users are NOT required to install Electron or Node.js on their machine.
+   - The build-pkg.sh build system automatically bundles the native FreeBSD
+     Electron runtime directly into /usr/local/share/openpublisher/electron/.
+   - A standard user simply installs the package with:
+       # pkg add openpublisher-5.pkg
+     and OpenPublisher is immediately ready to run out-of-the-box.
+
+5. SMOOTH NATIVE RESIZING & MULTI-THEME TITLEBAR:
+   - Elimination of Legacy Ghostwin:
+     Removed the unstable secondary helper window that caused X11 focus fighting
+     and freeze states.
+   - Real-Time 60 FPS Resizing:
+     Integrated 8 perimeter resize hitboxes (.resizer-n through .resizer-sw)
+     directly in wrapper.html with requestAnimationFrame pacing and 800x600
+     minimum dimension enforcement.
+   - Multi-Theme Drag Zones:
+     Titlebar drag areas are split into three dedicated non-blocking sectors
+     (#drag-zone-left, #drag-zone-left2, #drag-zone-right) that allow smooth
+     window dragging on both Windows and macOS titlebar themes without covering
+     toolbar buttons, document title editing, or coordinate readouts.
+
+================================================================================
+TECHNICAL ARCHITECTURE & IMPLEMENTATION DETAILS
+================================================================================
+
+1. PLATFORM ARCHITECTURE & RUNTIME MOTIVATION:
+   - The NW.js Limitation on FreeBSD:
+     OpenPublisher V5 was historically built on NW.js (Node-Webkit).
+     NW.js does not maintain or provide native FreeBSD binaries.
+     Running the Linux x86_64 NW.js build under FreeBSD's Linuxulator emulation
+     layer suffers from severe issues: epoll/sys_clone discrepancies, missing
+     glibc version symbols, X11/DRI3 GPU hardware acceleration failures, and
+     instabilities in Chromium's zygote process model.
+     Over 440 MB of unused legacy Linux NW.js binaries (nw, lib/, locales/, and
+     chromedriver) were dead weight on the FreeBSD filesystem.
+   - The FreeBSD Native Electron Solution:
+     FreeBSD provides official, actively maintained native ports and packages
+     for Electron (e.g., devel/electron43) compiled natively with Clang against
+     FreeBSD libc, native X11/Wayland backends, and FreeBSD audio subsystems.
+     Rather than rewriting or branching the core OpenPublisher application
+     (index.html and its massive graphics/layout engine), an architectural shim
+     was designed. The shim exposes the exact NW.js APIs expected by wrapper.html
+     and index.html while delegating under the hood to Electron's native IPC and
+     process management.
+
+2. DUAL-RUNTIME COMPATIBILITY & POLYFILL SUBSYSTEM:
+   - Electron Main Process (electron-main.js):
+     * Single-Instance Locking:
+       Utilizes app.requestSingleInstanceLock() to prevent redundant app instances.
+       When a user double-clicks an .opub document in FreeBSD file managers (Thunar,
+       Caja, Dolphin, PCManFM), the secondary launch passes its command-line
+       arguments to the primary running instance via the 'second-instance' hook.
+       The existing window is restored, focused, and instructed via IPC to open
+       the document.
+     * Frameless Window Configuration:
+       Spawns the main application window with:
+         frame: false (borderless modern presentation)
+         transparent: true (rounded corners and custom dropshadows)
+         hasShadow: false (avoids compositing artifacts under X11/XFWM/KWin/Mutter)
+         webPreferences: nodeIntegration: true, contextIsolation: false,
+           webviewTag: true, webSecurity: false, preload: electron-preload.js
+       This allows wrapper.html to host the guest <webview> hosting index.html
+       exactly as it did under NW.js.
+     * Native Window & IPC Handlers:
+       Provides robust, non-blocking IPC listeners for window manipulation
+       (minimize, maximize, unmaximize, close, set-bounds, get-bounds, reload),
+       shell operations (openExternal, openPath, showItemInFolder), and native
+       GTK file dialogs.
+   - NW.js Emulation Layer (electron-preload.js):
+     Synthesizes a comprehensive global.nw object prior to document initialization:
+       * nw.Window.get(): Provides a complete proxy mapping NW.js window methods
+         to Electron IPC calls with an event emitter for focus, blur, maximize,
+         unmaximize, minimize, restore, resize, and move.
+       * nw.App: Exposes nw.App.argv, nw.App.manifest, nw.App.dataPath,
+         nw.App.quit(), and routes 'open' events for file association.
+       * nw.Menu & nw.MenuItem: Emulates NW.js menu item types, click handlers,
+         accelerators, and context popup menus (menu.popup({ x, y })).
+       * nw.Shell & nw.Clipboard: Bridges file manager opening and system clipboard
+         operations seamlessly.
+
+3. ELIMINATION OF GHOSTWIN & IMPLEMENTATION OF REAL-TIME RESIZING:
+   - Legacy Ghostwin Problem:
+     In NW.js on Linux, frameless transparent windows could not be resized
+     natively by window managers. The legacy codebase worked around this using
+     a secondary helper window ("ghostwin") that sat beneath the main window
+     to catch border mouse events and forward resize deltas.
+     On FreeBSD with X11 window managers, ghostwin caused severe regressions:
+     multi-window focus fighting, blur cancellations, window manager flicker,
+     and dropped mouseup events leading to interface freezing.
+   - Native In-Window Real-Time Resizer:
+     The ghostwin process and all secondary window dependencies were completely
+     removed for FreeBSD.
+     Implemented 8 dedicated in-window resize hitboxes directly in wrapper.html:
+     .resizer-n, .resizer-s, .resizer-e, .resizer-w, .resizer-ne, .resizer-nw,
+     .resizer-se, .resizer-sw (each 6px wide along perimeter and corners).
+     Mouse events on these handles track pointer movements relative to the
+     screen origin and execute atomic setBounds calls:
+       window.electronAPI.setWindowBounds({ x, y, width, height })
+     Driven via requestAnimationFrame to ensure smooth 60 FPS resizing with
+     hardware synchronization, enforcing strict minimum dimension guards
+     (minWidth: 800px, minHeight: 600px).
+
+4. TITLEBAR LAYOUT, MULTI-THEME GEOMETRY & DRAG ZONES:
+   - Coordinate Display Collisions Resolved (inject.js):
+     In the guest webapp, #coord-display was positioned at top: 10px, right: 15px.
+     In the Windows layout, this placed the live coordinate readout directly
+     on top of the minimize and maximize window controls.
+     Updated the positioning of #coord-display to:
+       position: fixed;
+       top: 42px;
+       right: 15px;
+     This seats the coordinates cleanly below the titlebar controls, entirely
+     out of the way of both wrapper buttons and canvas margins.
+   - Drag Zone Sectoring & Click Protection (wrapper.html):
+     Unconstrained drag zones previously covered the client action buttons and
+     overlapped the document title rename input, blocking text selection and
+     preventing clicks.
+     Refactored the titlebar drag areas into three mathematically isolated
+     non-blocking zones spanning only unoccupied teal space:
+       * #drag-zone-left: Left edge buffer (width: 14px, left: 0px).
+       * #drag-zone-left2: Clearance buffer between the toolbar buttons and the
+         document title pill (left: 382px, width: calc(50% - 502px)).
+       * #drag-zone-right: Right boundary buffer between the document title pill
+         and window control buttons (left: calc(50% + 120px), right: 140px).
+     All interactive controls (buttons, inputs, menus) maintain
+     -webkit-app-region: no-drag and z-index priority.
+
+5. STANDALONE PACKAGING & BUILD PIPELINE (build-pkg.sh):
+   - Package Name: openpublisher
+   - Version: 5 (strictly numbered "5", reflecting OpenPublisher V5)
+   - Output File: openpublisher-5.pkg
+   - Origin: deskutils/openpublisher
+   - Categories: Office, Graphics, Publishing
+   - Architecture: FreeBSD:14:amd64 (or host architecture)
+   - Runtime Bundling: Copies native Electron directly into
+     /usr/local/share/openpublisher/electron/ so that end users have zero
+     external dependencies.
+
+6. DESKTOP INTEGRATION, BRANDING & FILE ASSOCIATIONS:
+   - Desktop Entry: /usr/local/share/applications/openpublisher.desktop
+   - MIME Definition: /usr/local/share/mime/packages/openpublisher.xml
+   - High-Resolution Icons: /usr/local/share/icons/hicolor/*/apps/openpublisher.png
+     and /usr/local/share/icons/hicolor/*/mimetypes/application-x-openpublisher.png
+     rendered from the official OpenPublisher V5 squircle artwork.
+
+7. FILESYSTEM CLEANUP & DIRECTORY NORMALIZATION:
+   - Removed ~440 MB of redundant Linux NW.js binaries (nw, lib/, locales/,
+     chromedriver).
+   - Normalized all files to standard Unix LF (\n) line endings.
+
+================================================================================
+FILES CREATED / MODIFIED:
+================================================================================
+
+  NEW       electron-main.js
+              - Electron main process with single-instance lock and IPC handlers
+  NEW       electron-preload.js
+              - Context bridge and NW.js API polyfill layer
+  MODIFIED  wrapper.html
+              - Dual-runtime detection, ghostwin removal, real-time resizing,
+                and responsive multi-theme drag zone architecture
+  MODIFIED  inject.js
+              - #coord-display repositioning (top: 42px) and guest webview IPC
+  NEW       build-pkg.sh
+              - Standalone FreeBSD .pkg build script with bundled Electron,
+                MIME registry, desktop entry, and icon generation
+  MODIFIED  package.json
+              - Set version to "5", main entry to "electron-main.js"
+  DELETED   nw, lib/, locales/, chromedriver
+              - Purged 440 MB of unused legacy Linux binaries
+  NEW       update_logs/freebsd_electron_port_and_standalone_pkg_architecture.txt
+              - Architecture specification and technical reference log
+
+================================================================================

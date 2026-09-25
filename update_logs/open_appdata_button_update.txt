@@ -1,0 +1,8 @@
+# Update: Developer HUD "Open AppData" Quick Action
+
+## Summary
+Added an "Open AppData" button to the Quick Actions section of the Developer HUD. This provides a one-click shortcut to instantly open the OS File Explorer directly to the application's hidden data directory where Chromium stores the app's cache, IndexedDB, local storage, and other profile data.
+
+## Changes
+- Developer HUD HTML (wrapper.html): Added a new <div class="dev-btn" id="dev-btn-open-appdata">Open AppData</div> button inside the .dev-toolbar container.
+- Developer HUD Logic (wrapper.html): Added an event listener that executes nw.Shell.showItemInFolder(nw.App.dataPath) when the button is clicked, instantly opening the OS native file explorer.

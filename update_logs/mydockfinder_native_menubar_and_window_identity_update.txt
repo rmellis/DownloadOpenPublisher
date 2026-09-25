@@ -1,0 +1,74 @@
+================================================================================
+UPDATE LOG: MyDockFinder Native Menubar, Drag Zone & OpenPublisher App Identity
+================================================================================
+Date: September 14, 2026
+Components:
+  - wrapper.html (Menu Bridge, Ribbon Triggers, Drag Zones, Title)
+  - op_native_menu.exe / op_native_menu.cs (Win32 Menu Bridge & Window Matching)
+  - op_menu_hook.dll (Pure Native 64-bit Hook DLL for MyDockFinder Dispatch)
+  - package.json (Window Title & Application Identity)
+  - OpenPublisher.exe (Standalone Executable Naming)
+
+OVERVIEW:
+Resolved several interconnected issues regarding MyDockFinder topbar integration,
+unwanted floating menubar decorations, drag zone misalignment, ribbon button click
+blocking, and application branding/process naming. The app now seamlessly integrates
+with MyDockFinder for macOS-style global desktop menus while preserving its pristine
+frameless, transparent design with accurate drag zones and working buttons.
+
+ROOT CAUSES & DETAILED SOLUTIONS:
+
+1. Elimination of Floating Menubar & Caption Buttons:
+   - Root Cause: In NW.js on Windows, assigning win.menu = appMenuBar forces
+     Chromium's internal views::MenuBar and FrameCaptionButtonContainerView
+     to render inside the window client area. This pushed the webview down by
+     ~28-30px, misplaced drag zones, and offset click targets. In addition,
+     calling DrawMenuBar(hwnd) instructed Win32 to draw menu text across the
+     window frame.
+   - Solution:
+     * Scoped win.menu = appMenuBar strictly to macOS (process.platform === 'darwin')
+       in wrapper.html.
+     * Removed DrawMenuBar() from op_native_menu.cs, retaining SetMenu(hwnd, hMenu).
+       This allows MyDockFinder to query the full Win32 menu tree via GetMenu(hwnd)
+       without Windows painting any menubar or caption buttons on the frameless window.
+     * Verified client dimensions match window dimensions (1320x760, diff 0).
+
+2. Drag Zone Optimization & Ribbon Click Restoration:
+   - Root Cause: #drag-zone-right in wrapper.html had height: 80px, while the top
+     bar is only 35-37px high. Because Chromium's -webkit-app-region: drag consumes
+     all mouse down and click events at the OS level, the extra 43px height blocked
+     clicks on ribbon buttons and drawing controls across the right 37% of the app.
+   - Solution: Reduced #drag-zone-right height from 80px to 37px, matching
+     #drag-zone-left and #drag-zone-left2. All ribbon tools, color pickers, and canvas
+     controls are now 100% interactive and responsive.
+
+3. MyDockFinder Menu Click Interception & Dispatch:
+   - Root Cause: MyDockFinder (Dock_64.exe) dispatches clicks by posting WM_COMMAND
+     (0x111) and WM_MENUCOMMAND (0x126) directly to the target window handle.
+     Chromium/NW.js frameless windows ignore these messages by default. Furthermore,
+     triggerRibbonButton in wrapper.html was previously trapped in local closure scope,
+     causing ReferenceError exceptions.
+   - Solution:
+     * Engineered a pure native 64-bit PE DLL (op_menu_hook.dll) exporting HookProc.
+       Installed via SetWindowsHookEx(WH_GETMESSAGE) into the OpenPublisher GUI thread.
+     * The hook intercepts WM_COMMAND and WM_MENUCOMMAND messages and forwards the
+       command ID to a dedicated hidden receiver window (OpenPublisher_MenuBridge_Receiver).
+     * The receiver window pipes COMMAND:<id> to stdout, where wrapper.html handles
+       it via handleNativeMenuCommand().
+     * Hoisted triggerRibbonButton to the outer scope with direct DOM injection fast
+       paths for all Insert tools (Text Box, Picture, Shapes, Table, Clipart, WordArt,
+       QR Code, Symbol) and Page Design tools (Orient, Size, Margins, Guides, H/F Toggle).
+
+4. Application Identity & Process Naming ('OpenPublisher'):
+   - Root Cause: Without explicit window title initialization in package.json, NW.js
+     defaults the window name to 'NW.js' during early CreateWindowEx initialization.
+     Additionally, running as nw.exe displays 'nw' or 'NW.js' in the Windows Task
+     Manager, volume mixer, and dock.
+   - Solution:
+     * Added 'title': 'OpenPublisher' inside the 'window' block of package.json.
+     * Updated <title> in wrapper.html from 'Open Publisher' to 'OpenPublisher'.
+     * Updated op_native_menu.cs to match windows by PID when provided, as well as
+       matching both 'OpenPublisher' and 'Open Publisher'.
+     * Provided OpenPublisher.exe in the root folder so launching the app registers
+       as OpenPublisher.exe across all Windows and MyDockFinder monitoring hooks.
+================================================================================

@@ -1,0 +1,18 @@
+# Save Notification Update
+
+## Overview
+Added a desktop notification system to visually alert the user whenever a publication is successfully saved to disk.
+
+## Key Features & Implementation
+
+1. **IPC Event Interception**
+   - Hooked into the existing `OP_SAVE_DATA` event handler within the `wrapper.html` IPC message listener.
+   - Tied the notification to fire immediately after the asynchronous `atomicSave()` function successfully completes its write operations.
+
+2. **Native Notification APIs**
+   - The notification relies on the `chrome.notifications.create` API, with a fallback to the standard HTML5 `new Notification()` API.
+   - Using the Chromium-specific API bypasses the strict Windows 10/11 Action Center requirement that typically suppresses standard HTML5 notifications if the application lacks a registered Start Menu `AppUserModelID`.
+   - Passes the `openoublisherv5st-icon.png` to display cleanly within the notification body.
+
+3. **Coverage**
+   - Both the standard "Save" and "Save As" logic paths have been updated to trigger the notification upon successful file write.

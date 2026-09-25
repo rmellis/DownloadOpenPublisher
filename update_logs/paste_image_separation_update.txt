@@ -1,0 +1,23 @@
+Paste Image Separation Update
+
+Overview:
+Implemented an intelligent paste interceptor to prevent images (such as those copied from websites) from embedding directly inside text boxes as un-editable inline HTML elements. The system now seamlessly extracts these images from the pasted payload, pastes the text normally, and triggers independent asset imports for the images.
+
+Changes Made:
+- Added a `capture` phase `paste` event listener in `mainWorldInjectionCode` to intercept all paste events before the web application processes them.
+- Analyzes `e.clipboardData.getData('text/html')` using `DOMParser`.
+- If `<img>` tags are found:
+  1. Their `src` attributes (web URLs, data URIs, or local file URIs) are collected.
+  2. The `<img>` tags are removed from the HTML tree and replaced with a subtle `[Image Separated]` text placeholder.
+  3. The cleaned, text-only HTML is safely inserted into the active text box using `document.execCommand('insertHTML')`.
+  4. An `OP_PROCESS_PASTED_IMAGES` IPC message is sent to the wrapper.
+- Added a new IPC handler in the wrapper for `OP_PROCESS_PASTED_IMAGES`:
+  - Iterates over the extracted image URLs.
+  - Transparently downloads web URLs (`http`/`https`) to the local OS temporary directory.
+  - Decodes base64 Data URIs to native image files in the temporary directory.
+  - Passes the resulting local `file:///` paths back into the guest web app as standard `OP_IMPORT_ASSET` events.
+
+Result:
+When a user pastes a mixed block of text and images from a website:
+1. The text pastes perfectly into the active text box (preserving rich styling).
+2. The images are automatically separated, saved locally, and dropped into the publication as distinct, independent, movable objects.

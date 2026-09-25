@@ -1,0 +1,11 @@
+# Update: Drag-and-Drop Image Asset Import (OP_IMPORT_ASSET)
+
+## Summary
+Updated native drag-and-drop handling in wrapper.html so that dropping image assets cleanly imports them into the publication without triggering or displaying the full-screen "Drop to open publication" overlay.
+
+## Changes
+- Publication Overlay Suppression for Images (wrapper.html): Added checkIsImageDrag() to inspect drag events (dragenter and dragover) for image MIME types (image/*, SVG) and image file extensions. When an image asset is dragged into the app, the wrapper suppresses the "Drop to open publication" overlay completely, allowing the user to view their canvas uninterrupted.
+- Direct Image Import Dispatched: When image files are dropped anywhere on the window or editor canvas, the wrapper intercepts them, suppresses document-opening logic (loadAssociatedFile), and dispatches an OP_IMPORT_ASSET IPC message containing the absolute local OS file path (payload and path) straight into the web application.
+- Comprehensive Image Format Support: Supports all web-compatible formats including .png, .jpg, .jpeg, .jfif, .pjpeg, .pjp, .gif, .webp, .svg, .bmp, .ico, .cur, .avif, and .tif / .tiff.
+- Guest Drop Listener Guard: Updated the webview guest drop listener to also check both filename and file path, dispatching OP_IMPORT_ASSET for images and preventing accidental OP_NEW_DOC triggers.
+- Developer HUD IPC Event Logger: Enhanced logIpcEvent to format OP_IMPORT_ASSET entries using getFileName(), displaying the clean image filename on a new line in the HUD logger.

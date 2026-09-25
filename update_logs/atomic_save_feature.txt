@@ -1,0 +1,21 @@
+# Atomic Save Feature
+
+## Overview
+The Atomic Save feature ensures that document saves in Open Publisher are completely safe from corruption caused by sudden crashes, power outages, or full-disk errors during the save process.
+
+## How it Works
+Instead of directly overwriting the original `.opub` file, the system uses a 4-step atomic process:
+
+1. **Temporary Write**: The new document data is written to a temporary file (`[filename].opub.tmp`). The original file remains completely untouched during this phase.
+2. **Verification**: The system checks the byte-length of the `.tmp` file to verify that the write was successful and the file is not empty (e.g., catching disk-full errors mid-write).
+3. **Backup Rotation**: If the original file already exists, it is copied to a backup file (`[filename].opub.bak`). This ensures you always have the last known-good version of your document.
+4. **Atomic Rename**: The system renames the `.tmp` file to the original file path (`[filename].opub`). At the OS level, this is a single, uninterruptible operation. The file is either perfectly replaced or not touched at all.
+
+## Error Handling
+- If the temporary write or verification fails, the `.tmp` file is deleted, an error is thrown, and the original file is preserved.
+- If the backup rotation fails (e.g., due to permission issues), a warning is logged, but the save continues since the new data is securely stored in the `.tmp` file.
+
+## Integration
+This system is integrated into `wrapper.html` via the `atomicSave(filePath, data)` helper function and is active for both:
+- **Direct Saves** (e.g., pressing `Ctrl+S` on an existing document)
+- **Save As** (e.g., saving a brand new document for the first time)

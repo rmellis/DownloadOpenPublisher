@@ -1,0 +1,83 @@
+Clipboard Scrapbook Subsystem & Ribbon Drawer Integration Update
+
+Overview:
+Added an automated "Clipboard Scrapbook" subsystem directly into OpenPublisher's wrapper host and guest web application. This update includes:
+1. Automated background OS clipboard image interception that polls for copied images (from browsers, screenshot tools, image editors, etc.) every 2 seconds for both PNG and JPEG formats.
+2. Local temporary disk cache with a FIFO limit of 25 items, persisting image data and metadata across application launches.
+3. Dual native ribbon buttons injected into Home -> Clipboard and Insert -> Illustrations, featuring teal icons and live badge counters.
+4. Acrylic glass floating drawer sidebar styled after OpenPublisher's native Graphics Manager panel, supporting 1-click canvas insertion and drag-and-drop.
+5. Natural image sizing: inserts images at their authentic pixel dimensions (e.g. 640x480 as 640x480), proportionally scaling down to fit the document margins while strictly preserving aspect ratio if oversized.
+6. Responsive canvas nudge: automatically calculates overlap if the document page is near the right edge when the drawer opens, smoothly scrolling the viewport left into view, and seamlessly restoring position when retracted or closed.
+7. Mutual sidebar exclusivity: automatically detects when another sidebar (Format Picture, WordArt, Table Layout, Selection Pane, Graphics Manager, Shadow/Glow, Thesaurus, Accessibility Checker) is opened and instantly closes the Scrapbook drawer.
+8. Native image resize behavior: images scale dynamically with their bounding box during resize (using object-fit: fill), allowing full aspect-ratio flexibility without being letterboxed or trapped inside an empty box.
+9. Startup reliability and freeze prevention: eliminated microtask queue starvation by strictly scoping observers to .ribbon-container and using idempotent badge updates, ensuring reliable application launch across all platforms.
+10. Cross-platform readiness: full compatibility across Windows, macOS, and Linux using unified NW.js clipboard bindings, dynamic OS user data paths, and universal system font fallbacks.
+
+Changes Made:
+- Background Image Polling & Cross-Platform Storage (wrapper.html):
+  - Configured a 2-second interval querying nw.Clipboard.get().get('png') and get('jpeg').
+  - Unified across Windows (Win32 clipboard), macOS (NSPasteboard), and Linux (X11/Wayland).
+  - Normalizes both raw Base64 data and standard data URI prefixes to guarantee valid buffer decoding.
+  - Generates a SHA-256 hash of incoming image payloads to prevent redundant disk writes and UI duplicate triggers.
+  - Directly extracts image width and height from PNG IHDR chunk headers (bytes 16..24) and JPEG SOF0/SOF2 markers without requiring offscreen image element generation.
+  - Automatically writes captures to the local user data directory (nw.App.dataPath + clipboard_scrapbook) and maintains index.json across Windows (%LOCALAPPDATA%), macOS (~/Library/Application Support), and Linux (~/.config).
+  - Restricts cache retention to the 25 most recent images (MAX_SCRAPBOOK_ITEMS = 25), unlinking discarded PNG/JPEG files from disk automatically.
+
+- Dual Ribbon Bar Integration (Home -> Clipboard and Insert -> Illustrations):
+  - Injected #ribbon-scrapbook-btn-home into #ribbon-home .group labeled "Clipboard" (alongside Paste and Copy/Cut).
+  - Injected #ribbon-scrapbook-btn-insert into #ribbon-insert .group labeled "Illustrations" (immediately following Picture and Placeholder).
+  - Automatically purges any legacy Scrapbook button from the Insert -> Graphics group.
+  - Both buttons use native .tool-btn styling (50px min-width, 65px height, teal <i class="fas fa-clipboard-list"></i> icon).
+  - Synchronizes dynamic counter badges (#scrapbook-ribbon-badge-home and #scrapbook-ribbon-badge-insert) indicating current captured item count.
+  - Synchronizes active tool highlight (.active-tool) across both buttons when the drawer is open.
+  - Features mutation observer, initialization retry timers, and tab click listeners to ensure permanent ribbon stability across tab switches.
+
+- Floating Drawer Sidebar (#op-clipboard-sidebar):
+  - Injected directly into document.body with fixed positioning (right: 0, top: 205px, bottom: 22px, width: 310px).
+  - Avoids polluting .workspace flex layout, completely preventing unwanted flex margin shifts or background gutter display.
+  - Features high-end acrylic glass design with backdrop blur, subtle borders, and smooth slide animation (transform: translateX).
+  - Complete Dark Mode theme support, adapting backgrounds, text, and card borders automatically.
+  - Card layout matches Graphics Manager with image thumbnail preview, capture timestamp, resolution, file size, and "Insert Image" button.
+  - Includes "Clear History" button to purge captured images and unlinked cache files on demand.
+
+- Mutual Sidebar Exclusivity & Auto-Close:
+  - Installed a global MutationObserver and capture-phase click handler that monitors all built-in sidebar panels (e.g., #op-image-sidebar, #op-wordart-sidebar, #op-table-sidebar, #op-selection-sidebar, #op-graphics-sidebar, #op-shadow-sidebar, #op-thesaurus-sidebar, #op-a11y-sidebar, and any .sidebar-panel / .op-sidebar).
+  - Whenever another sidebar receives the .visible class or is opened by the user, the Scrapbook drawer automatically closes, cleans up its active ribbon button state, and restores any canvas viewport nudge.
+  - Conversely, opening the Scrapbook drawer immediately closes any active built-in sidebar panel, guaranteeing clean layout exclusivity.
+
+- Natural Image Sizing & Dynamic Resizing:
+  - Added calculateTargetImageSize(origW, origH, paper) helper to compute correct canvas dimensions.
+  - Normal-sized images (e.g., 640x480) insert at exact pixel dimensions instead of collapsing to default 200x100 rectangles.
+  - Oversized graphics exceeding document margins are proportionally downscaled relative to their aspect ratio.
+  - Configured inserted image elements with object-fit: fill and absolute positioning, matching OpenPublisher's native picture rules.
+  - When resizing the bounding box via selection handles, the image stretches and fills the bounding box directly with no letterboxing or blank trapped space. Shift-resizing continues to scale proportionally.
+  - Both 1-click "Insert Image" (centered on document) and canvas drag-and-drop (centered on cursor) utilize natural sizing.
+
+- Automatic Canvas Viewport Nudge & Restore:
+  - Added checkAndNudgeCanvas(opening) to detect when the document page (#paper) is partially obscured near the screen's right edge.
+  - Smoothly scrolls #viewport to the left by the exact overlap amount plus a 25px breathing margin when the sidebar opens.
+  - Remembers the applied nudge offset and automatically scrolls #viewport back to its original position when the sidebar closes.
+  - Equipped with a MutationObserver on #op-clipboard-sidebar to guarantee position restoration regardless of how the sidebar is closed (close button, ribbon toggle, or opening another sidebar).
+  - Listens for window resize events to keep the canvas visible if the window size changes while the drawer is open.
+
+- Startup Reliability & Observer Scoping (Freeze Prevention):
+  - Resolved an infinite microtask starvation loop that previously caused the application to freeze 1-2 seconds after the splash screen disappeared.
+  - Root cause: Observer fallback targeted document.body with subtree childList monitoring while badge updates used .innerText, which continually destroyed and recreated text nodes, triggering an endless microtask loop that starved setTimeout timers and user events.
+  - Scoped ribbonObserver strictly to .ribbon-container (never document.body) and added early-exit guards to ensureRibbonButtons() once both buttons exist.
+  - Switched badge updates to idempotent .textContent assignments guarded by equality checks.
+  - Scoped otherSidebarObs strictly to class attribute mutations (attributes: true, attributeFilter: ['class']).
+
+- Cross-Platform System Integration (Windows, macOS, Linux):
+  - Unified clipboard capture leveraging nw.Clipboard.get('png') and get('jpeg') across Win32, macOS NSPasteboard, and Linux X11/Wayland.
+  - Dynamic user storage directory resolution utilizing nw.App.dataPath and path.join(), automatically adapting to %LOCALAPPDATA% (Windows), ~/Library/Application Support/ (macOS), and ~/.config/ (Linux).
+  - Universal binary image header inspection using Node.js Buffer with big-endian network byte order for PNG (IHDR) and JPEG (SOF0/SOF2).
+  - UI typography and styling incorporates system font stacks (-apple-system, Segoe UI, Roboto, sans-serif) and vendor-prefixed backdrop filters (-webkit-backdrop-filter) for native visual fidelity on all operating systems.
+
+Usage:
+1. Copy any image on your computer (from a browser, screenshot tool, image editor, etc.).
+2. OpenPublisher silently logs the image into the Scrapbook cache within 2 seconds.
+3. Click the "Scrapbook" button on either the Home tab (under Clipboard) or the Insert tab (under Illustrations) to open the drawer.
+4. If your document page is near the right edge, it automatically slides left into plain view.
+5. Click "Insert Image" or drag any card directly onto your canvas to insert at authentic size.
+6. Drag any of the 8 selection handles to resize the picture to whatever shape you want; hold Shift if you want to lock the aspect ratio.
+7. Open any other sidebar (Format Picture, WordArt, Selection Pane, Table Layout, etc.) and the Scrapbook drawer closes automatically.

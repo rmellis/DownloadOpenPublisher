@@ -1,0 +1,69 @@
+================================================================================
+UPDATE LOG: OpenPublisher V5 Dynamic Operating System Edition Detection
+================================================================================
+Date: September 19, 2026
+Component: wrapper.html (Startup Engine, Splash Screen, & Platform Highlighting)
+
+OVERVIEW:
+Implemented dynamic operating system detection on the startup splash screen.
+Previously, the splash screen footer displayed a static "Windows Edition" label.
+The startup subsystem now detects the active host platform and dynamically
+updates the footer label and platform icon array to support Windows, macOS,
+Linux, and FreeBSD (engineered to support current NW.js and future Electron
+desktop variants).
+
+KEY ARCHITECTURAL HIGHLIGHTS & IMPLEMENTATION DETAILS:
+
+1. Dynamic Operating System Detection Engine:
+   - detectOperatingSystemInfo(overridePlatform):
+     * Inspects process.platform ('win32', 'darwin', 'linux', 'freebsd')
+       under Node.js, NW.js, and Electron desktop runtimes.
+     * Fallbacks to require('os').platform() if available.
+     * Fallbacks to modern Chromium navigator.userAgentData.platform.
+     * Fallbacks to standard navigator.platform and navigator.userAgent for
+       browser and web environments.
+     * Normalizes platform indicators into canonical OS descriptors:
+       - 'win32'   -> Name: 'Windows', Label: 'Windows Edition', Icon: 'windows'
+       - 'darwin'  -> Name: 'Mac',     Label: 'Mac Edition',     Icon: 'mac'
+       - 'linux'   -> Name: 'Linux',   Label: 'Linux Edition',   Icon: 'linux'
+       - 'freebsd' -> Name: 'FreeBSD', Label: 'FreeBSD Edition', Icon: 'freebsd'
+
+2. Dynamic Splash Screen Labeling:
+   - Immediately mutates #splash-footer upon HTML parse:
+     * Windows: "OpenPublisher V5 Windows Edition"
+     * Mac:     "OpenPublisher V5 Mac Edition"
+     * Linux:   "OpenPublisher V5 Linux Edition"
+     * FreeBSD: "OpenPublisher V5 FreeBSD Edition"
+   - Runs synchronously during DOM layout before splash render, ensuring zero
+     visual flicker, delay, or stale branding text.
+
+3. Platform Icon Array & FreeBSD Integration:
+   - Integrated the official vector FreeBSD brand logo ('fab fa-freebsd') into
+     the .splash-platform-icons container alongside Windows, Apple, Linux,
+     and Web icons.
+   - Active Platform Illumination:
+     * Dynamically illuminates the detected host operating system icon with an
+       active glowing teal highlight:
+       .splash-platform-icons i.active {
+           color: #5eead4 !important;
+           opacity: 1 !important;
+           filter: drop-shadow(0 0 8px rgba(94, 234, 212, 0.65));
+       }
+     * Muted non-active platform icons remain subtly translucent with smooth
+       hover transition feedback.
+
+4. Future Electron & Multi-Target Architecture:
+   - Fully decoupled from NW.js-specific globals; functions seamlessly under
+     Electron (using process.platform and process.versions.electron) or web
+     deployments with zero modifications required.
+   - Supports manual runtime overrides via applyOperatingSystemEdition(platform)
+     for simulator testing and multi-OS previews.
+
+5. Automated Verification & Test Results:
+   - Automated Playwright Test Suite:
+     * win32 platform:   Verified footer 'OpenPublisher V5 Windows Edition' and active Windows icon.
+     * darwin platform:  Verified footer 'OpenPublisher V5 Mac Edition' and active Apple icon.
+     * linux platform:   Verified footer 'OpenPublisher V5 Linux Edition' and active Linux icon.
+     * freebsd platform: Verified footer 'OpenPublisher V5 FreeBSD Edition' and active FreeBSD icon.
+     * 100% pass rate across all test cases with zero runtime errors.
+================================================================================

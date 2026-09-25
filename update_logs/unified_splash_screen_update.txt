@@ -1,0 +1,72 @@
+Unified Application Splash Screen & Real-Time Boot Sync Update (Flow Redesign Edition)
+
+Overview:
+Unified OpenPublisher's startup splash screen into a single high-quality modern experience matching the Flow UI design.
+Previously, two splash screens appeared sequentially: first the desktop app splash screen, followed by the website's floating splash screen.
+This update suppresses the website's splash screen completely, ports all live boot subsystem logs and progress tracking into the desktop app splash screen, introduces the new Flow UI aesthetic, expands the frosted-glass activity console with a radiant halo glow, eliminates duplicate logs, and guarantees smooth, forward-moving progress without backwards jumps.
+
+Key Improvements:
+1. Flow UI Redesign & Modern Aesthetics:
+   - Faceted Geometric Backdrop: Built with an inline scalable vector structure featuring translucent diagonal glass shards, sharp ambient highlight lines, and a fine halftone dot matrix grid overlay (splash-dots).
+   - Horizontal Brand Lockup: Pure white OpenPublisher vector printer/document icon horizontally paired with bold 42px typography, a frosted "V5" pill badge, and the subtitle centered below.
+   - Radiant Mint-to-Cyan Progress Bar: 5px ultra-sleek pill progress track with vibrant gradient fill (#14b8a6 to #ffffff) and a soft cyan drop glow.
+   - Repositioned Status Row: Subsystem status (left) and percentage (right) placed cleanly between the progress bar and the console.
+   - Expanded Halo Console: 630px width, 175px height, 14px border radius, with a deep glass background (rgba(6, 44, 40, 0.52)) and a radiant cyan perimeter halo glow (box-shadow: 0 0 28px rgba(45, 212, 191, 0.45)).
+
+2. Complete Suppression of Website Splash Screen:
+   - Injected CSS (#splash-screen { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }) into the guest webview on contentload.
+   - Added a MutationObserver script inside the webview to catch and immediately hide the guest splash element if dynamically created.
+   - Eliminates duplicate splash screens and prevents any visual flashing of the web version.
+
+3. Elimination of Duplicate Log Entries:
+   - Resolved dual-capture root cause: removed the redundant second consolemessage listener previously present in the asynchronous message interceptor block.
+   - Added strict deduplication guards inside updateSplashBootLog to ignore consecutive duplicate messages.
+   - Boot subsystem logs now appear strictly once per event with clean readability.
+
+4. Silky-Smooth Continuous Subpixel Progress Engine:
+   - Replaced discrete progress jumps with a 16ms continuous ticker loop (initProgressTicker) separating targetProgress from displayedProgress with proportional easing.
+   - Immediate Launch: targetProgress initializes to 4% so the glowing progress bar begins moving visibly within the first 30ms of launch (eliminates initial delay).
+   - Continuous Motion & Anti-Hang: An active asymptotic creep (+0.035% per frame) guarantees the progress bar never completely halts or freezes while awaiting webview compilation.
+   - Updated CSS transition from width 0.22s ease-out to width 0.12s linear with toFixed(2) subpixel precision, completely eliminating cubic-bezier stutter.
+   - Smooth Decisive Completion: On initialization complete, progress glides decisively into 100% over ~200ms rather than snapping abruptly.
+
+5. Graceful Dismissal & Recovery:
+   - When initialization completes:
+     - Progress bar smoothly completes to 100%.
+     - Status updates to "Ready".
+     - Console logs "> ✅ Open Publisher successfully initialized." in bold emerald accent.
+     - Smoothly dissolves the splash screen after a 350ms polish delay (0.6s ease-out).
+   - Offline retry and crash recovery handlers reset all queues, counters, and progress states cleanly.
+
+6. Streaming 63 Client-Side Subsystem Boot Features:
+   - Integrated CLIENT_SIDE_BOOT_SUBSYSTEMS array into wrapper.html with all 63 verified features derived from the project .txt documentation.
+   - Enqueues all subsystems immediately into the splash queue on startup so the console streams active initializations rather than waiting idly.
+   - Updates the status label dynamically for each mounted subsystem and scales progress smoothly across the entire startup sequence.
+   - Features an adaptive pacing mechanism: steady 22ms cadence while streaming client subsystems (~1.4s), switching to a 4ms fast-flush upon completion so window launch is never delayed.
+
+7. Full 115-Module Boot Calibration & Watchdog Hardening:
+   - Extracted all 115 distinct boot modules directly from openpublisher.app (TOTAL_WEBVIEW_STEPS = 115), calibrating the full boot trajectory to 178 total milestones (63 client subsystems + 115 webview modules).
+   - Eliminated the 96% progress plateau at step 72 by smoothly mapping Phase 2 from 35% to 96% across all 115 webview modules (+0.53% per module).
+   - Hardened the safety watchdog from 4.5s to 20s (and 25s on initial contentload), preventing network latency, font fetching, or script compilation pauses from prematurely killing the splash screen.
+   - Added explicit watchdog cancellation upon receiving the final initialization message to guarantee that the tail end of the log queue always flushes completely to "Ready" before the splash screen dissolves.
+   - Integrated asymptotic micro-creep up to 98% to keep the progress bar active during any script evaluation lulls.
+
+8. Local vs Remote Origin Icons & Autonomous Stream Decoupling:
+   - Visual Origin Badges: Embedded dedicated inline vector icons to the immediate left of the checkmark (✅) in #splash-console:
+     - Local Client Features: Cyan desktop monitor icon (#38bdf8) designating native wrapper hooks, crash reporters, local window persistence, and desktop OS integrations.
+     - Remote Web Subsystems: Purple network computer icon (#c084fc) designating webapp publication engines, remote typography, and cloud clipart systems.
+   - Decoupled from Webapp Artificial Delay:
+     - Integrated the full 115-module catalog directly into the wrapper host as WEBAPP_PUBLICATION_MODULES.
+     - The desktop host now drives the complete 178-milestone boot stream autonomously, eliminating stalls caused by the webapp's artificial delay loop or remote network fetch pauses.
+     - Dynamic pacing (32ms to 46ms) keeps the console rhythmically active without freezing mid-boot, switching to a 4ms fast-flush upon completion so window launch is instantaneous.
+
+Testing & Verification:
+- Automated headless browser test suite (test_splash_async.py, test_video_scenario.py, and test_unified_splash.py) verified:
+  - All 63 client-side boot subsystems + 115 webview modules stream accurately into #splash-console (178 total milestones).
+  - Cyan desktop monitor icon displays for client features, purple network computer icon displays for webapp modules.
+  - Progress bar starts moving immediately within 400ms (zero initial delay).
+  - Progress bar strictly monotonic test: verified progress percentage never decreases during startup.
+  - Zero mid-boot stalls or premature dismissals when simulating network pauses.
+  - Completion sequence, 100% progress transition, and graceful splash dismissal.
+  - Guest CSS and DOM MutationObserver suppression rules.
+

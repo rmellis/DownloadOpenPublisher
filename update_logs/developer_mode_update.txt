@@ -1,0 +1,42 @@
+# Developer Mode & UI Live Reload Update
+
+## Overview
+Added a hidden, draggable OpenPublisher Debug HUD to `wrapper.html` triggered via `Ctrl+Shift+D` (or `Cmd+Shift+D` on Mac). When enabled, it displays real-time performance metrics (RAM, FPS, DOM nodes) in a floating HUD, provides Quick Action tools for reloading and inspecting, logs IPC traffic, and runs an active file watcher on local UI files to auto-reload the application when changes are detected.
+
+## Key Features & Implementation
+
+1. **Activation & Universal Hotkey (`Ctrl+Shift+D`)**
+   - Implemented hotkey detection across all application contexts:
+     - Directly in `wrapper.html` window and document scopes.
+     - Injected into the Webview main world bridge (`mainWorldInjectionCode`).
+   - Pressing `Ctrl+Shift+D` from anywhere toggles Developer Mode instantly.
+   - State is stored in `localStorage` (`op_dev_mode`) so Developer Mode remains active across reloads during development sessions.
+   - Added a 450ms cooldown inside `toggleDevMode()` and `e.repeat` guards to prevent multi-context bubbling from toggling the overlay on and off instantly.
+
+2. **Floating Draggable Debug HUD**
+   - Modern dark HUD (`#dev-mode-overlay`) positioned at the bottom-right corner.
+   - Draggable by the header handle so it can be repositioned anywhere without obstructing workspace tools.
+   - Displays real-time Performance Metrics:
+     - **Webview RAM**: Live memory usage from `window.performance.memory.usedJSHeapSize` inside the webview.
+     - **Webview FPS**: Real-time rendering frame rate measured via `requestAnimationFrame` inside the webview canvas, color-coded for performance.
+     - **DOM Nodes**: Live count of total DOM elements inside the webview context.
+     - **UI Auto-Reload Status**: Visual badge indicating active filesystem watching.
+
+3. **Quick Actions Toolbar**
+   - Included 4 handy buttons with custom, theme-matched confirmation dialogs to prevent accidental data loss:
+     - **Reload App**: Safely reloads the entire Node.js wrapper (`wrapper.html`).
+     - **Reload View**: Safely reloads only the inner `webview` editor.
+     - **App DevTools**: Opens Chrome DevTools for the outer Node.js window.
+     - **View DevTools**: Opens Chrome DevTools for the inner webview to directly access the DOM/console.
+
+4. **Live IPC Event Logger**
+   - A scrollable terminal at the bottom of the HUD that intercepts and displays the last 15 `OP_IPC:` messages.
+   - Logs include timestamps, auto-scroll, and specific color-coded badges for event payloads.
+   - Enhanced `OP_USER_ACTIVITY` logging: Instead of generic repetitive entries, user actions are classified with descriptive yellow badges (e.g. `[Click (Canvas)]`, `[Key: "A"]`, `[Canvas Zoom]`, `[Clipboard Paste]`, `[Right Click (Context Menu)]`).
+   - Automatically injects an `OS_FILE_LOAD` event when files are opened from the Recent Files list or OS association to accurately reflect application state.
+
+5. **Local UI CSS & Interface File Watcher**
+   - Uses Node.js `fs.watch` to monitor the project root recursively for modifications to `.css` stylesheets and core interface files (`wrapper.html`, `inject.js`).
+   - Automatically filters out document saves (`.opub`, `.bak`, `.tmp`), logs, docs, and binary assets to prevent unintended reload loops.
+   - Debounces rapid file writes before triggering `window.location.reload()`, with an initial 1500ms startup grace period to ignore Windows filesystem scans.
+   - Includes `loadLocalStylesheets()` to automatically link and apply any `.css` files into the application interface.

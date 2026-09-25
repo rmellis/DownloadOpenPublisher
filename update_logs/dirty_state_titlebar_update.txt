@@ -1,0 +1,13 @@
+# Update: Dynamic Titlebar Dirty State Indication
+
+## Summary
+The wrapper now actively monitors the document for unsaved changes and updates the web app's titlebar in real-time, appending a visual (*) indicator next to the document name when it's "dirty", and removing it the moment it is successfully saved or exported.
+
+## Changes
+- **Real-Time Dirty State Broadcast (wrapper.html)**:
+  - Injected a lightweight polling loop into the webview's main world that continually evaluates the document state against _lastSavedData.
+  - When the state changes, it broadcasts a new OP_DIRTY_STATE_CHANGE IPC message up to the wrapper.
+- **Native Titlebar Integration (Non-Destructive)**:
+  - Instead of overwriting the web app's native #doc-title text (which could interfere with the user's ability to rename the file), the wrapper intercepts OP_DIRTY_STATE_CHANGE and uses webview.executeScript to inject a visually separated #doc-dirty-indicator span directly adjacent to it.
+  - The (*) indicator sits perfectly aligned but remains totally separate from the actual document title data, ensuring the filename remains completely untouched. It is styled with a lower opacity (0.4) and slightly smaller font to look like a subtle system indicator rather than part of the text.
+  - Intercepted the native atomic save callbacks (OP_SAVE_DATA) and OP_EXPORT_COMPLETE to instantly clear the dirty indicator upon a successful file write.

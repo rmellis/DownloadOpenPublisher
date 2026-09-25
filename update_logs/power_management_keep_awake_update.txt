@@ -1,0 +1,17 @@
+# Update: Chromium Power Management (chrome.power Keep-Awake)
+
+## Summary
+Integrated Chromium's chrome.power API into wrapper.html to prevent the OS from going to sleep or triggering screen savers during document saves and export processes.
+
+## Changes & Implementation Details
+- **Power Management Helpers**:
+  - Implemented equestPowerKeepAwake() to call chrome.power.requestKeepAwake('display') with safe environment checks (	ypeof chrome !== 'undefined' && chrome.power).
+  - Implemented eleasePowerKeepAwake() to invoke chrome.power.releaseKeepAwake() to immediately restore standard OS power and sleep behaviors once operations conclude.
+
+- **Export & Save Lifecycle Hooking**:
+  - **Direct Save (OP_SAVE_DATA with ctiveFilePath)**: Triggers equestPowerKeepAwake() simultaneously with taskbar progress and webview animation, and calls eleasePowerKeepAwake() upon write completion or write failure.
+  - **Save As (OP_SAVE_DATA via file dialog)**: Engages keep-awake once a target file path is chosen and releases it once the atomic write finishes or encounters an error.
+  - **Explicit Export Events (OP_EXPORT_START / OP_EXPORT_COMPLETE)**: Connected keep-awake requests and releases directly to dedicated export IPC messages.
+
+- **Safety & Teardown Handlers**:
+  - Hooked eleasePowerKeepAwake() into win.on('close') and the custom exit modal confirmation to ensure power lock release if the window is closed during an active export operation.

@@ -1,0 +1,50 @@
+# Built-in Previous Versions System & Background Snapshot Engine
+
+## Overview
+Implemented a standalone, document-centric Previous Versions system in OpenPublisher (styled after Windows Shadow Copies / Previous Versions), completely separate from the Backup Manager. The system automatically creates timestamped .bak snapshots in the application directory every 15 minutes for saved publications with unsaved edits, preserves pre-save copies on manual saves, enforces a 50-snapshot retention limit with manual clear controls, and provides safe "Restore" (overwrite with confirmation) and "Open as Copy" recovery workflows.
+
+## Changes Made
+1. **Completely Standalone GUI Modal (wrapper.html)**:
+   - Implemented #custom-prev-versions-overlay and draggable #custom-prev-versions-modal styled after native OpenPublisher dialogs.
+   - Separate from the Backup Manager: Backup Manager displays all backups newest-first, while Previous Versions specifically focuses on the active document currently being edited.
+   - Includes a scope bar with the active document name pill and an "Only show current document" filter checkbox (checked by default; can be unchecked to browse snapshots across all projects).
+   - Features real-time search filtering, a Refresh button, and direct Windows File Explorer access to the versions directory.
+   - Displays a clean table with Snapshot Date & Time, Document Title, Page Count, File Size, and Relative Age (e.g., "5 mins ago", "1 hour ago", "Yesterday").
+
+2. **15-Minute Periodic Snapshot Engine**:
+   - Runs a background 15-minute interval timer (PERIODIC_VERSION_INTERVAL_MS = 15 * 60 * 1000).
+   - Strictly active only for saved publications (activeFilePath !== null). If the user is working on an unsaved draft, periodic archiving is skipped.
+   - Only triggers if the publication has unsaved modifications (_isDocumentDirty === true), eliminating redundant duplicates when the user is idle or hasn't made changes.
+   - Asynchronously requests document state from the webview via IPC (OP_PERIODIC_VERSION_DATA) and writes snapshots without freezing or interrupting canvas editing.
+
+3. **Pre-Save Snapshot Rotation**:
+   - Integrated into atomicSave() to automatically archive a timestamped version snapshot into the Versions folder immediately prior to overwriting the file on disk.
+
+4. **Dedicated Versions Directory & Standardized Naming**:
+   - Stored in AppData\Local\OpenPublisher\User Data\Default\Backups\Versions (with safe fallback to %TEMP%\OpenPublisher-Backups\Versions).
+   - Uses sanitized, Windows-safe filenames: [SanitizedTitle]_[YYYY-MM-DD]_[HH-mm-ss].bak (e.g., Publication1_2026-09-12_14-30-00.bak).
+   - Files are standard OpenPublisher JSON publications, allowing direct standalone loading.
+
+5. **50-Snapshot Retention Limit & Clear Controls**:
+   - Automatically maintains the 50 most recent snapshots per publication title, automatically purging older versions beyond this cap.
+   - "Clear History" button in the UI prompts confirmation and clears snapshots for the active document (or across all projects if viewing all).
+   - "Delete" button allows removing individual selected snapshots.
+
+6. **Safe Recovery Workflows**:
+   - **Open as Copy**: Loads the snapshot into the canvas with the pour animation, setting activeFilePath = null and labeling the title as [Title] (Copy of Version) so the current file on disk is never endangered and the user can Save As elsewhere.
+   - **Restore**: Displays an explicit confirmation modal (#custom-version-restore-overlay) showing the exact target path and snapshot timestamp. When confirmed, creates an emergency pre-restore safety copy, safely overwrites the file on disk via atomicSave(), and reloads the editor.
+
+7. **Multi-Entry Access & Responsive Layout**:
+   - **Titlebar Button**: Added #prev-versions-btn with a layered document icon in #controls-wrapper-left next to the Backup Manager button.
+   - **Progressive Responsive Hiding**: Configured updateTopbarButtonsVisibility() with a 970px visible width threshold for Previous Versions and 910px for Backup Manager, gracefully hiding icons as the window narrows to prevent overlapping the document title.
+   - **System Tray**: Added "Previous Versions..." to the right-click system tray context menu.
+   - **Developer HUD**: Added a "Previous Versions" button to the Quick Actions toolbar.
+
+8. **Startup & V8 Syntax Reliability**:
+   - Fixed unescaped backticks in restore notification and delete/clear confirmation dialogs, preventing startup parser errors and ensuring the splash screen dismisses cleanly.
+
+9. **Snapshot Capture & Canonical File Linking Fix**:
+   - Main World Context Execution: Injected snapshot extraction into the main document context, ensuring state.pages and serializeCurrentPage are accessed directly rather than blocked by isolated script boundaries.
+   - Automatic Baseline Snapshot: When any document is opened or saved, an initial baseline snapshot is automatically created if none exists yet, ensuring version history is immediately available upon opening the dialog.
+   - Canonical File Naming: Uses the active publication file basename as the snapshot naming prefix so all versions for that document consistently match and appear in the "Only show current document" view.
+   - On-Demand Snapshot Button: Added a "Take Snapshot" button in the Previous Versions dialog toolbar to allow instant manual snapshots at any time.

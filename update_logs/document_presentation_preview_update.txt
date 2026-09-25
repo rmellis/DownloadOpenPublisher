@@ -1,0 +1,47 @@
+================================================================================
+UPDATE LOG: Document Presentation Preview (Standalone Tearaway Subsystem)
+================================================================================
+Date: September 13, 2026
+Component: wrapper.html & doc_preview.html (Presentation Preview Subsystem)
+
+OVERVIEW:
+Implemented a dedicated, standalone Presentation Preview window (doc_preview.html)
+powered by NW.js multi-window architecture. This provides users with a clean,
+distraction-free preview environment that mirrors the active OpenPublisher
+canvas in real time with high-fidelity scaling, page navigation, and full-screen
+presentation capabilities.
+
+KEY FEATURES & ARCHITECTURAL HIGHLIGHTS:
+1. Standalone Native Window (doc_preview.html):
+   - Frameless, translucent dark-glass aesthetic with native OS window dragging
+     via -webkit-app-region: drag and a JavaScript mousedown/mousemove fallback.
+   - Independent window sizing (840x640 default) that can be moved across monitors
+     independently of the main OpenPublisher window.
+   - Dynamic theme synchronization matching OpenPublisher's active palette.
+
+2. Live Canvas Mirroring & Scrape Pipeline:
+   - Real-time MutationObserver installed on the webview's #paper element.
+   - Canvas DOM mutations and style updates are debounced (250ms) and streamed
+     directly to the presentation window without interrupting editor typing.
+   - Native DOM/SVG cloning pipeline with ZERO html2canvas dependency, ensuring
+     crisp vector rendering and razor-sharp typography at any display scaling.
+
+3. Presentation Controls & Navigation:
+   - Header badge displaying the active publication name and current page number.
+   - Page thumbnail navigation strip allowing instant jumping across multi-page documents.
+   - Zoom controls with presets (Fit, 50%, 75%, 100%, 150%, 200%) and smooth mouse-wheel zooming.
+   - Dedicated Fullscreen presentation mode with keyboard shortcut (F11 / Esc).
+
+4. Robust Window Lifecycle:
+   - Dedicated tearaway pop-out and docking bridge (popOutDocPreview / dockDocPreview).
+   - Single-instance mutex guard: clicking Presentation Preview when already open
+     brings the existing window into focus rather than creating duplicate windows.
+   - Direct window termination on #btn-close and the Escape key.
+   - Heartbeat watcher that automatically closes the preview window if the main
+     OpenPublisher application window closes or terminates.
+
+VERIFICATION:
+- Verified real-time canvas updates between webview and doc_preview.html.
+- Validated zoom scaling, fit-to-screen logic, and multi-page thumbnail navigation.
+- Tested single-instance mutex and automated cascade close upon application exit.
+================================================================================
