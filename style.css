@@ -573,6 +573,29 @@ body {
     line-height: 1.5;
 }
 
+.note-box-warning {
+    margin-top: 8px;
+    padding: 7px 11px;
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 3px solid #f59e0b;
+    border-radius: 6px;
+    font-size: 0.77rem;
+    color: #92400e;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+}
+
+.note-box-warning svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #d97706;
+}
+
 .terminal-note {
     display: flex;
     flex-direction: column;
@@ -1459,6 +1482,7 @@ body {
 }
 
 .os-icon.win-color { background: #e0f2fe; color: #0284c7; }
+.os-icon.xp-color { background: #dbeafe; color: #1d4ed8; }
 .os-icon.mac-color { background: #f3f4f6; color: #1f2937; }
 .os-icon.lin-color { background: #fef3c7; color: #d97706; }
 .os-icon.bsd-color { background: #fee2e2; color: #dc2626; }
@@ -1951,6 +1975,11 @@ body {
 .pkg-cell-icon-wrap.bsd-bg {
     background: #fee2e2;
     color: #dc2626;
+}
+
+.pkg-cell-icon-wrap.xp-bg {
+    background: #dbeafe;
+    color: #1d4ed8;
 }
 
 .pkg-cell-name {

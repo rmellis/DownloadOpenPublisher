@@ -28,11 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     url: 'https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe',
                     isPrimary: false,
                     icon: '<img src="images/icon_windows_portable.png" alt="Windows Portable" class="btn-pkg-img">'
+                },
+                {
+                    title: 'Download Windows XP Edition (.exe)',
+                    desc: 'Legacy x86 standalone &bull; Chromeless Gecko engine tuned for Windows XP SP3',
+                    url: 'https://github.com/rmellis/open-publisher/releases/download/5.8.0/OpenPublisher5-i386-windowsXP.exe',
+                    isPrimary: false,
+                    icon: '<img src="images/icon_windows_portable.png" alt="Windows XP Edition" class="btn-pkg-img">'
                 }
             ],
             notesHtml: `
                 <div class="note-box">
-                    <strong>Windows Integration:</strong> Auto-discovers local Windows fonts from the registry, supports Always-on-Top pushpin, and DWM window shadow styling.
+                    <strong>Windows Integration:</strong> Auto-discovers local Windows fonts from the registry, supports Always-on-Top pushpin, and DWM window shadow styling. Dedicated Windows XP build features a chromeless Gecko engine (MyPal 68 / Firefox 78 ESR) with embedded modern SVG window controls and desktop bridge.
+                </div>
+                <div class="note-box-warning">
+                    <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    <span><strong>XP Compatibility Note:</strong> Running the legacy XP app on modern Windows (10/11) will result in being unable to drag the app around or close the app due to specific Windows XP tuning. Please use the 64-bit build above on modern systems.</span>
                 </div>
             `
         },
@@ -284,6 +295,15 @@ document.addEventListener('DOMContentLoaded', () => {
             tagIcon: '🛡️',
             tagTitle: '4-Step Atomic Saves & AppData Recovery Manager',
             tagDesc: 'Writes to temporary storage, verifies byte integrity, atomically replaces destination, and silently archives historical snapshots.'
+        },
+        xp: {
+            title: 'Open Publisher V5 (Windows_XP_Gecko.opub)',
+            dpi: 'Chromeless Gecko 78',
+            unit: 'Windows XP SP3',
+            img: 'images/windows_xp_interface.png',
+            tagIcon: '🪟',
+            tagTitle: 'Windows XP Dedicated Client Port',
+            tagDesc: 'Chromeless Gecko engine based on MyPal 68 / Firefox 78 ESR. Features zero-height XUL collapsing, embedded modern SVG window controls, desktop web app bridge, and standalone x86 portable distribution.'
         }
     };
 
