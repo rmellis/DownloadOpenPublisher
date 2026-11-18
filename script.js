@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     title: 'Download Gecko Edition (.exe) <span class="rollout-pill">Phase 1 &bull; 79 MB</span>',
                     desc: 'Tuned Mozilla Gecko core &bull; Zero zoom lag, new fixes, &amp; OTA updates',
-                    url: 'https://github.com/rmellis/open-publisher/releases/download/5.20.8/openpublisher5g_amd64-windows.exe',
+                    url: 'http://openpublisher.app/setup.exe',
                     isPrimary: false,
                     icon: '<img src="images/icon_windows_installer.png" alt="Windows Gecko Edition" class="btn-pkg-img">'
                 },
