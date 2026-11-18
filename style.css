@@ -597,6 +597,12 @@ body {
     vertical-align: middle;
 }
 
+.btn-panel-primary .rollout-pill {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
 .coming-soon-pill {
     display: inline-block;
     margin-left: 6px;
@@ -643,6 +649,16 @@ body {
 
 .rollout-step.active strong {
     color: var(--teal-primary);
+}
+
+.rollout-step.done {
+    background: #f0fdf4;
+    border-color: rgba(16, 185, 129, 0.28);
+    color: var(--text-muted);
+}
+
+.rollout-step.done strong {
+    color: #059669;
 }
 
 .action-card-notes {
