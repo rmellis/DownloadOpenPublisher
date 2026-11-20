@@ -30,16 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon: '<img src="images/icon_windows_portable.png" alt="Windows Portable" class="btn-pkg-img">'
                 },
                 {
-                    title: 'Download Gecko Edition (.exe) <span class="rollout-pill">Speed Alt &bull; 79 MB</span>',
-                    desc: 'Tuned Mozilla Gecko core &bull; Speed &amp; performance alternative (third-party AV warnings)',
-                    url: 'http://openpublisher.app/setup.exe',
-                    isPrimary: false,
+                    title: 'Gecko Edition (.exe) <span class="coming-soon-pill">Paused</span>',
+                    desc: 'Temporarily paused during AV clearance &bull; Tuned Mozilla Gecko core (79 MB)',
+                    disabled: true,
                     icon: '<img src="images/icon_windows_installer.png" alt="Windows Gecko Edition" class="btn-pkg-img">'
                 },
                 {
-                    title: 'Gecko Portable Edition <span class="coming-soon-pill">Coming Soon</span>',
-                    desc: 'Standalone Mozilla Gecko portable package &bull; Coming soon',
-                    comingSoon: true,
+                    title: 'Gecko Portable Edition <span class="coming-soon-pill">Paused</span>',
+                    desc: 'Temporarily paused during AV clearance &bull; Standalone Mozilla Gecko portable package',
+                    disabled: true,
                     icon: '<img src="images/icon_windows_portable.png" alt="Gecko Portable Edition" class="btn-pkg-img">'
                 },
                 {
@@ -192,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (panelButtonsArea) {
             let btnsHtml = '';
             data.buttons.forEach(btn => {
-                if (btn.comingSoon) {
+                if (btn.comingSoon || btn.disabled) {
                     btnsHtml += `
                         <div class="btn-panel-option btn-panel-disabled" aria-disabled="true">
                             <div class="btn-icon-wrap">${btn.icon}</div>

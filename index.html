@@ -408,8 +408,18 @@
                 </div>
             </div>
 
-            <!-- Spotlight 4: Optional Gecko Speed & Performance Alternative -->
-            <div class="spotlight-row reverse">
+            <!-- Spotlight 4: Optional Gecko Speed & Performance Alternative (Temporarily Paused) -->
+            <div class="spotlight-row reverse spotlight-paused">
+                <div class="spotlight-paused-overlay" aria-hidden="true">
+                    <svg class="spotlight-paused-cross" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <line x1="1.5" y1="1.5" x2="98.5" y2="98.5" stroke="rgba(15, 118, 110, 0.28)" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linecap="round"/>
+                        <line x1="98.5" y1="1.5" x2="1.5" y2="98.5" stroke="rgba(15, 118, 110, 0.28)" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linecap="round"/>
+                    </svg>
+                    <div class="spotlight-paused-stamp">
+                        <span>⏸</span>
+                        <span>Temporarily Paused During AV Clearance &bull; Currently Inactive</span>
+                    </div>
+                </div>
                 <div class="spotlight-text">
                     <span class="spotlight-label">Optional Speed Alternative &bull; Gecko Edition</span>
                     <h3>Gecko Edition: Side Alternative for Speed &amp; Performance</h3>
@@ -433,7 +443,7 @@
                             <span class="mockup-pill">Mozilla Gecko ESR Alternative &bull; 79 MB</span>
                         </div>
                         <img src="https://github.com/user-attachments/assets/60ebf7bd-170b-4910-96c1-20baacb6f4a0" alt="Open Publisher V5 High-Performance Gecko Desktop Engine Upgrade" class="mockup-img">
-                        <div class="mockup-caption">Supports Windows 7, 8, 8.1, 10, and 11 (x64). Portable Gecko edition coming soon.</div>
+                        <div class="mockup-caption">Supports Windows 7, 8, 8.1, 10, and 11 (x64). Gecko installer and portable builds are temporarily paused during AV clearance.</div>
                     </div>
                 </div>
             </div>
@@ -1453,13 +1463,13 @@
                             <img src="images/icon_windows_portable.png" alt="Windows Portable" class="btn-os-icon">
                             <span>Portable (.exe)</span>
                         </a>
-                        <a href="http://openpublisher.app/setup.exe" class="btn-platform-outline">
+                        <div class="btn-platform-disabled" aria-disabled="true">
                             <img src="images/icon_windows_installer.png" alt="Gecko Edition" class="btn-os-icon">
-                            <span>Gecko Edition (.exe) &bull; Speed Alt</span>
-                        </a>
+                            <span>Gecko Edition (.exe) &bull; Temporarily Paused During AV Clearance</span>
+                        </div>
                         <div class="btn-platform-disabled" aria-disabled="true">
                             <img src="images/icon_windows_portable.png" alt="Gecko Portable" class="btn-os-icon">
-                            <span>Gecko Portable (.exe) &bull; Coming Soon</span>
+                            <span>Gecko Portable (.exe) &bull; Temporarily Paused During AV Clearance</span>
                         </div>
                     </div>
                 </div>
@@ -1962,16 +1972,16 @@
                             <td><code>openpublisher5_amd64-windows-portable.exe</code></td>
                             <td class="col-action"><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe" class="btn-table-dl">Download</a></td>
                         </tr>
-                        <tr>
+                        <tr class="row-disabled">
                             <td>
                                 <div class="pkg-cell">
                                     <img src="images/icon_windows_installer.png" alt="Windows Gecko Edition" class="pkg-cell-icon">
                                     <span class="pkg-cell-name">Windows (Gecko)</span>
                                 </div>
                             </td>
-                            <td><span class="pkg-format-label">Gecko Edition (.exe) &bull; Speed Alt (AV Warning)</span></td>
-                            <td><code>setup.exe</code></td>
-                            <td class="col-action"><a href="http://openpublisher.app/setup.exe" class="btn-table-dl">Download</a></td>
+                            <td><span class="pkg-format-label">Gecko Edition (.exe) &bull; Speed Alt</span></td>
+                            <td><span class="pkg-paused-code">Temporarily Paused</span></td>
+                            <td class="col-action"><span class="btn-table-dl-disabled" aria-disabled="true">Temporarily Paused During AV Clearance</span></td>
                         </tr>
                         <tr>
                             <td>
@@ -2091,7 +2101,7 @@
                 <ul>
                     <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows.exe">Windows (.exe)</a></li>
                     <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe">Windows Portable</a></li>
-                    <li><a href="http://openpublisher.app/setup.exe">Windows Gecko Edition (.exe)</a></li>
+                    <li><span class="footer-link-disabled" aria-disabled="true">Windows Gecko Edition (Temporarily Paused During AV Clearance)</span></li>
                     <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.8.0/OpenPublisher5-i386-windowsXP.exe">Windows XP Edition (.exe)</a></li>
                     <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-macos.dmg">macOS (.dmg)</a></li>
                     <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-linux.run">Linux Universal (.run)</a></li>
