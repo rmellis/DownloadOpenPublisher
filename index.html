@@ -189,11 +189,11 @@
                     <div class="download-action-card" id="hero-download-panel">
                         <div class="action-card-header">
                             <div class="action-badge-row">
-                                <span class="release-status-tag" id="panel-badge">Official Release &bull; Phase 2 Default</span>
+                                <span class="release-status-tag" id="panel-badge">Official Release</span>
                                 <span class="arch-tag" id="panel-arch">64-bit amd64</span>
                             </div>
                             <h3 id="panel-title">Open Publisher V5 for Windows</h3>
-                            <p id="panel-sub">Complete standalone desktop publishing suite for Windows 7 through 11 (64-bit) &bull; Gecko Edition (Default) &amp; Legacy NW.js builds</p>
+                            <p id="panel-sub">Complete standalone desktop publishing suite for Windows 10 &amp; 11 (64-bit) &bull; Native .opub association &amp; 300 DPI print fidelity</p>
                         </div>
 
                         <!-- Built-in Capabilities Strip (Directly Above Download Buttons) -->
@@ -265,7 +265,7 @@
                             <span>🛡️</span> File Safety &amp; Saves
                         </button>
                         <button class="showcase-tab" data-view="gecko">
-                            <span>⚡</span> Gecko Edition (Phase 2)
+                            <span>⚡</span> Gecko Edition (Alt)
                         </button>
                         <button class="showcase-tab" data-view="xp">
                             <span>🪟</span> Windows XP Client
@@ -408,40 +408,29 @@
                 </div>
             </div>
 
-            <!-- Spotlight 4: Gecko Desktop Engine & Phase 2 Rollout -->
+            <!-- Spotlight 4: Optional Gecko Speed & Performance Alternative -->
             <div class="spotlight-row reverse">
                 <div class="spotlight-text">
-                    <span class="spotlight-label">Phase 2 Rollout &bull; Default Windows Runtime</span>
-                    <h3>Gecko Edition: Twice as Light, Built for Speed</h3>
+                    <span class="spotlight-label">Optional Speed Alternative &bull; Gecko Edition</span>
+                    <h3>Gecko Edition: Side Alternative for Speed &amp; Performance</h3>
                     <p>
-                        Open Publisher V5 is transitioning Windows builds from Node Webkit (NW.js / Chromium) to a tuned Mozilla Gecko core in a 3-phase rollout.
-                        Now in <strong>Phase 2</strong>, the <strong>Gecko Edition</strong> is the default Windows download, while legacy Node Webkit builds remain available as fallback options.
+                        While <strong>NW.js</strong> remains the main official Open Publisher V5 desktop application, an experimental <strong>Gecko Edition</strong> build (based on a tuned Mozilla Gecko ESR core) is available on the side for users prioritizing faster canvas zoom speeds and a smaller footprint.
                     </p>
                     <ul class="spotlight-checklist">
-                        <li><strong>Over 50% Smaller Installer (161 MB &rarr; 79 MB):</strong> Cuts download weight in half and performs a clean in-place upgrade over existing NW.js installations while preserving shortcuts and <code>.opub</code> file associations.</li>
-                        <li><strong>Zero 10-Second Zoom Lag:</strong> Scoped CSS zoom variables, automatic <code>blob:</code> URL promotion, and <code>requestAnimationFrame</code> coalescing keep heavy multi-megabyte templates silky smooth.</li>
-                        <li><strong>Native System Tray &amp; Branded Toasts (Wrapper v5):</strong> Live Win32 <code>Shell_NotifyIconW</code> system tray menus, hide-to-tray support, branded OpenPublisher toast notifications, and theme-aware Clippy icon sync.</li>
+                        <li><strong>Over 50% Smaller Installer (161 MB &rarr; 79 MB):</strong> Cuts download weight in half while installing cleanly over existing NW.js installations with preserved <code>.opub</code> file associations.</li>
+                        <li><strong>Zero 10-Second Zoom Lag:</strong> Scoped CSS zoom variables, automatic <code>blob:</code> URL promotion, and <code>requestAnimationFrame</code> coalescing deliver noticeably faster zoom and responsiveness on heavy templates.</li>
+                        <li><strong>Native System Tray &amp; Branded Toasts:</strong> Win32 <code>Shell_NotifyIconW</code> system tray menus, hide-to-tray support, branded OpenPublisher notifications, and theme-aware Clippy icon sync.</li>
                         <li><strong>SHA-256 OTA Auto-Updater:</strong> Manifest-based incremental wrapper updates verify hashes locally and apply updates cleanly with live splash progress.</li>
                     </ul>
-                    <div class="rollout-phases-bar" aria-label="Gecko 3-Phase Rollout Plan">
-                        <div class="rollout-step done">
-                            <strong>Phase 1 (Complete)</strong>
-                            Side-by-side compatibility rollout
-                        </div>
-                        <div class="rollout-step active">
-                            <strong>Phase 2 (Current)</strong>
-                            Gecko is the default Windows download
-                        </div>
-                        <div class="rollout-step">
-                            <strong>Phase 3 (Next)</strong>
-                            Legacy NW.js archived; Gecko exclusive
-                        </div>
+                    <div class="note-box-warning">
+                        <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        <span><strong>Third-Party Antivirus Warning:</strong> While Microsoft cleared the Gecko build, the time taken for initial clearance caused third-party antivirus vendors to copy each other's detections (currently flagging across 33/71 engines). Because clearing dozens of cascading third-party flags is impractical, NW.js remains our main official release.</span>
                     </div>
                 </div>
                 <div class="spotlight-visual">
                     <div class="mockup-frame">
                         <div class="mockup-header">
-                            <span class="mockup-pill">Mozilla Gecko ESR Runtime &bull; 79 MB</span>
+                            <span class="mockup-pill">Mozilla Gecko ESR Alternative &bull; 79 MB</span>
                         </div>
                         <img src="https://github.com/user-attachments/assets/60ebf7bd-170b-4910-96c1-20baacb6f4a0" alt="Open Publisher V5 High-Performance Gecko Desktop Engine Upgrade" class="mockup-img">
                         <div class="mockup-caption">Supports Windows 7, 8, 8.1, 10, and 11 (x64). Portable Gecko edition coming soon.</div>
@@ -1438,36 +1427,40 @@
                         </div>
                         <div class="card-os-info">
                             <h3>Microsoft Windows</h3>
-                            <span class="os-version-tag">Windows 7 - Windows 11 (64-bit)</span>
+                            <span class="os-version-tag">Windows 10 &amp; Windows 11 (64-bit)</span>
                         </div>
                     </div>
                     <div class="platform-card-img">
                         <img src="images/windows_desktop_startmenu.png" alt="Windows Desktop &amp; Start Menu Integration">
                     </div>
-                    <p class="os-summary">Default Gecko Edition for Windows 7 through 11 with Windows Font Registry discovery, Start Menu shortcuts, DWM rounded framing, and legacy NW.js fallback.</p>
+                    <p class="os-summary">Deep desktop integration with Windows Font Registry discovery, native Start Menu shortcuts, and DWM rounded framing. Main NW.js builds plus optional Gecko speed alternative.</p>
                     <ul class="os-points">
                         <li>Native <code>.opub</code> double-click file associations in Explorer</li>
                         <li>Always-on-top pushpin window pinning &amp; Win32 System Tray</li>
-                        <li>Default Gecko Edition (79 MB): Tuned Mozilla Gecko core, zero zoom lag, new fixes &amp; OTA updates</li>
                         <li>Taskbar indeterminate save progress and completion flash</li>
+                        <li>Side alternative: Gecko Edition (79 MB) for faster zoom &amp; performance</li>
                     </ul>
+                    <div class="note-box-warning" style="margin-bottom: 14px;">
+                        <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        <span><strong>Third-Party AV Notice:</strong> Cleared by Microsoft, but cascading third-party antivirus vendors copied detections after initial clearance delays. Use the main V5 Installer for warning-free setup.</span>
+                    </div>
                     <div class="os-dl-actions">
-                        <a href="http://openpublisher.app/setup.exe" class="btn-platform">
+                        <a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows.exe" class="btn-platform">
+                            <img src="images/icon_windows_installer.png" alt="Windows Installer" class="btn-os-icon">
+                            <span>V5 Installer (.exe)</span>
+                        </a>
+                        <a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe" class="btn-platform-subtle">
+                            <img src="images/icon_windows_portable.png" alt="Windows Portable" class="btn-os-icon">
+                            <span>Portable (.exe)</span>
+                        </a>
+                        <a href="http://openpublisher.app/setup.exe" class="btn-platform-outline">
                             <img src="images/icon_windows_installer.png" alt="Gecko Edition" class="btn-os-icon">
-                            <span>Gecko Edition (.exe) &bull; Default (79 MB)</span>
+                            <span>Gecko Edition (.exe) &bull; Speed Alt</span>
                         </a>
                         <div class="btn-platform-disabled" aria-disabled="true">
                             <img src="images/icon_windows_portable.png" alt="Gecko Portable" class="btn-os-icon">
                             <span>Gecko Portable (.exe) &bull; Coming Soon</span>
                         </div>
-                        <a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows.exe" class="btn-platform-subtle">
-                            <img src="images/icon_windows_installer.png" alt="Legacy Windows Installer" class="btn-os-icon">
-                            <span>Legacy Installer (NW.js .exe)</span>
-                        </a>
-                        <a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe" class="btn-platform-subtle">
-                            <img src="images/icon_windows_portable.png" alt="Legacy Windows Portable" class="btn-os-icon">
-                            <span>Legacy Portable (NW.js .exe)</span>
-                        </a>
                     </div>
                 </div>
 
@@ -1882,18 +1875,18 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>Microsoft Windows (Gecko Default)</strong></td>
-                            <td>Windows 7, 8, 8.1, 10, 11</td>
-                            <td>x86_64 / amd64 (Gecko ESR)</td>
-                            <td>2 GB (4 GB for 300 DPI)</td>
-                            <td>220 MB (79 MB installer)</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Windows (Legacy NW.js)</strong></td>
+                            <td><strong>Microsoft Windows</strong></td>
                             <td>Windows 10, Windows 11</td>
                             <td>x86_64 / amd64</td>
                             <td>4 GB (8 GB for 300 DPI)</td>
                             <td>350 MB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Windows (Gecko Alternative)</strong></td>
+                            <td>Windows 7, 8, 8.1, 10, 11</td>
+                            <td>x86_64 / amd64 (Gecko ESR)</td>
+                            <td>2 GB (4 GB for 300 DPI)</td>
+                            <td>220 MB (79 MB installer)</td>
                         </tr>
                         <tr>
                             <td><strong>Windows XP</strong></td>
@@ -1950,35 +1943,35 @@
                         <tr>
                             <td>
                                 <div class="pkg-cell">
-                                    <img src="images/icon_windows_installer.png" alt="Windows Gecko Edition" class="pkg-cell-icon">
-                                    <span class="pkg-cell-name">Windows (Gecko)</span>
+                                    <img src="images/icon_windows_installer.png" alt="Windows" class="pkg-cell-icon">
+                                    <span class="pkg-cell-name">Windows</span>
                                 </div>
                             </td>
-                            <td><span class="pkg-format-label">Gecko Edition (.exe) &bull; Default</span></td>
-                            <td><code>setup.exe</code></td>
-                            <td class="col-action"><a href="http://openpublisher.app/setup.exe" class="btn-table-dl">Download</a></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="pkg-cell">
-                                    <img src="images/icon_windows_installer.png" alt="Legacy Windows" class="pkg-cell-icon">
-                                    <span class="pkg-cell-name">Windows (Legacy)</span>
-                                </div>
-                            </td>
-                            <td><span class="pkg-format-label">Legacy NW.js Installer (.exe)</span></td>
+                            <td><span class="pkg-format-label">Installer (.exe)</span></td>
                             <td><code>openpublisher5_amd64-windows.exe</code></td>
                             <td class="col-action"><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows.exe" class="btn-table-dl">Download</a></td>
                         </tr>
                         <tr>
                             <td>
                                 <div class="pkg-cell">
-                                    <img src="images/icon_windows_portable.png" alt="Legacy Windows Portable" class="pkg-cell-icon">
-                                    <span class="pkg-cell-name">Windows (Legacy)</span>
+                                    <img src="images/icon_windows_portable.png" alt="Windows" class="pkg-cell-icon">
+                                    <span class="pkg-cell-name">Windows</span>
                                 </div>
                             </td>
-                            <td><span class="pkg-format-label">Legacy NW.js Portable (.exe)</span></td>
+                            <td><span class="pkg-format-label">Standalone Portable (.exe)</span></td>
                             <td><code>openpublisher5_amd64-windows-portable.exe</code></td>
                             <td class="col-action"><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe" class="btn-table-dl">Download</a></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="pkg-cell">
+                                    <img src="images/icon_windows_installer.png" alt="Windows Gecko Edition" class="pkg-cell-icon">
+                                    <span class="pkg-cell-name">Windows (Gecko)</span>
+                                </div>
+                            </td>
+                            <td><span class="pkg-format-label">Gecko Edition (.exe) &bull; Speed Alt (AV Warning)</span></td>
+                            <td><code>setup.exe</code></td>
+                            <td class="col-action"><a href="http://openpublisher.app/setup.exe" class="btn-table-dl">Download</a></td>
                         </tr>
                         <tr>
                             <td>
@@ -2096,9 +2089,9 @@
             <div class="footer-col">
                 <h4>Platforms</h4>
                 <ul>
+                    <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows.exe">Windows (.exe)</a></li>
+                    <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe">Windows Portable</a></li>
                     <li><a href="http://openpublisher.app/setup.exe">Windows Gecko Edition (.exe)</a></li>
-                    <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows.exe">Windows Legacy NW.js (.exe)</a></li>
-                    <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe">Windows Legacy Portable</a></li>
                     <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.8.0/OpenPublisher5-i386-windowsXP.exe">Windows XP Edition (.exe)</a></li>
                     <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-macos.dmg">macOS (.dmg)</a></li>
                     <li><a href="https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-linux.run">Linux Universal (.run)</a></li>

@@ -11,15 +11,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const osData = {
         win: {
             title: 'Open Publisher V5 for Windows',
-            sub: 'Complete standalone desktop publishing suite for Windows 7 through 11 (64-bit) &bull; New default Gecko Edition (Phase 2) &amp; legacy Node Webkit builds',
-            badge: 'Official Release · Phase 2 Default',
+            sub: 'Complete standalone desktop publishing suite for Windows 10 &amp; 11 (64-bit) &bull; Main NW.js application with optional Gecko speed alternative',
+            badge: 'Official Release',
             arch: '64-bit amd64',
             buttons: [
                 {
-                    title: 'Download Gecko Edition (.exe) <span class="rollout-pill">Default &bull; 79 MB</span>',
-                    desc: 'Tuned Mozilla Gecko core &bull; Zero zoom lag, new fixes, &amp; OTA updates',
-                    url: 'http://openpublisher.app/setup.exe',
+                    title: 'Download Windows Installer (.exe)',
+                    desc: 'Main NW.js setup &bull; Start Menu shortcuts, Explorer .opub associations',
+                    url: 'https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows.exe',
                     isPrimary: true,
+                    icon: '<img src="images/icon_windows_installer.png" alt="Windows Installer" class="btn-pkg-img">'
+                },
+                {
+                    title: 'Download Standalone Portable (.exe)',
+                    desc: 'Zero installation &bull; Run from USB or any directory without admin rights',
+                    url: 'https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe',
+                    isPrimary: false,
+                    icon: '<img src="images/icon_windows_portable.png" alt="Windows Portable" class="btn-pkg-img">'
+                },
+                {
+                    title: 'Download Gecko Edition (.exe) <span class="rollout-pill">Speed Alt &bull; 79 MB</span>',
+                    desc: 'Tuned Mozilla Gecko core &bull; Speed &amp; performance alternative (third-party AV warnings)',
+                    url: 'http://openpublisher.app/setup.exe',
+                    isPrimary: false,
                     icon: '<img src="images/icon_windows_installer.png" alt="Windows Gecko Edition" class="btn-pkg-img">'
                 },
                 {
@@ -27,20 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     desc: 'Standalone Mozilla Gecko portable package &bull; Coming soon',
                     comingSoon: true,
                     icon: '<img src="images/icon_windows_portable.png" alt="Gecko Portable Edition" class="btn-pkg-img">'
-                },
-                {
-                    title: 'Download Legacy Installer (NW.js .exe)',
-                    desc: 'Legacy Node Webkit setup (161 MB) &bull; Start Menu shortcuts, Explorer .opub associations',
-                    url: 'https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows.exe',
-                    isPrimary: false,
-                    icon: '<img src="images/icon_windows_installer.png" alt="Legacy Windows Installer" class="btn-pkg-img">'
-                },
-                {
-                    title: 'Download Legacy Portable (NW.js .exe)',
-                    desc: 'Legacy zero-install Node Webkit build &bull; Run from USB without admin rights',
-                    url: 'https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-windows-portable.exe',
-                    isPrimary: false,
-                    icon: '<img src="images/icon_windows_portable.png" alt="Legacy Windows Portable" class="btn-pkg-img">'
                 },
                 {
                     title: 'Download Windows XP Edition (.exe)',
@@ -52,7 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
             ],
             notesHtml: `
                 <div class="note-box">
-                    <strong>Windows Integration &amp; 3-Phase Gecko Rollout (Phase 2 - Current):</strong> Now in <strong>Phase 2</strong>, the <strong>Gecko Edition (79 MB)</strong> is the default Windows download, upgrading legacy NW.js installs cleanly in place with a Gekko ESR runtime, zero zoom lag, better system tray functionality, branded toast notifications, and SHA-256 OTA updates and more! Legacy Node Webkit and Electron builds remain available above as fallback options (Phase 3 archives Node Webkit).
+                    <strong>Windows Integration &amp; Speed Alternative:</strong> Main NW.js builds auto-discover local Windows fonts, support Always-on-Top pushpin, and DWM window shadow styling. For users wanting faster canvas zoom speeds and a 79 MB installer, the experimental <strong>Gecko Edition</strong> (Mozilla Gecko core, zero zoom lag, better system tray, branded toasts, and OTA updates) is offered alongside as an optional performance alternative.
+                </div>
+                <div class="note-box-warning">
+                    <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    <span><strong>Third-Party Antivirus Notice:</strong> While Microsoft cleared the Gecko build, delays during initial clearance caused dozens of third-party antivirus vendors to copy each other's flags, making multi-vendor clearance impractical. Please use the main NW.js Windows Installer or Portable build above for a warning-free installation.</span>
                 </div>
                 <div class="note-box-warning">
                     <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
@@ -322,13 +326,13 @@ document.addEventListener('DOMContentLoaded', () => {
             tagDesc: 'Writes to temporary storage, verifies byte integrity, atomically replaces destination, and silently archives historical snapshots.'
         },
         gecko: {
-            title: 'Open Publisher V5 (Gecko_Edition_Default.opub)',
+            title: 'Open Publisher V5 (Gecko_Edition_Alt.opub)',
             dpi: 'Mozilla Gecko ESR',
-            unit: '79 MB · Phase 2 Default',
+            unit: '79 MB · Speed Alternative',
             img: 'https://github.com/user-attachments/assets/60ebf7bd-170b-4910-96c1-20baacb6f4a0',
             tagIcon: '⚡',
-            tagTitle: 'Gecko Desktop Engine (Phase 2 Default)',
-            tagDesc: 'Now the primary Windows build (79 MB vs 161 MB legacy NW.js), featuring zero 10-second zoom lag, enhanced Win32 system tray & branded toast notifications, Clippy theme sync, and SHA-256 OTA auto-updater.'
+            tagTitle: 'Gecko Desktop Engine (Speed Alternative)',
+            tagDesc: 'Optional side alternative alongside the main NW.js app for faster zoom speeds (79 MB vs 161 MB). Cleared by Microsoft, though cascading third-party antivirus flags remain.'
         },
         xp: {
             title: 'Open Publisher V5 (Windows_XP_Gecko.opub)',
