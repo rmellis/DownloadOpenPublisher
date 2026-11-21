@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     title: 'Download Portable (.AppImage)',
                     desc: 'Universal portable binary &bull; Runs on all modern Linux distributions',
-                    url: 'https://github.com/rmellis/open-publisher/releases/download/5.1.4/openpublisher5_amd64-linux.AppImage',
+                    url: 'https://github.com/rmellis/open-publisher/releases/download/5.23.2/openpublisher5_amd64-linux.AppImage',
                     isPrimary: true,
                     icon: '<img src="images/icon_linux_appimage.png" alt="Linux AppImage" class="btn-pkg-img">'
                 },
